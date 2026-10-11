@@ -168,7 +168,7 @@ def studio_enabled() -> bool:
     """Whether Qutie Studio was installed with the driver ("Driver and Qutie Studio").
 
     The setup records the choice in the app's entry in Installed apps. When the app is
-    not installed (development, or "Qutie Setup.exe" run from Downloads) the Studio is
+    not installed (development, or "Qutie-Setup.exe" run from Downloads) the Studio is
     available.
     """
     import winreg
@@ -270,7 +270,7 @@ def launch_self(*arguments: str) -> None:
     """Start the Qutie app (the installed copy when there is one).
 
     Without arguments it opens the app's settings window: "--app" is explicit because
-    "Qutie Setup.exe" started without arguments would open the setup wizard again.
+    "Qutie-Setup.exe" started without arguments would open the setup wizard again.
     """
     subprocess.Popen(_app_command(*(arguments or ("--app",))), creationflags=_NO_WINDOW)
 

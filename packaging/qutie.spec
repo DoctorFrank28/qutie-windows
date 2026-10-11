@@ -1,6 +1,6 @@
 # PyInstaller: one executable for the whole app (tray, preview, settings, Qutie Studio, setup wizard).
 # Build:  uv run pyinstaller packaging/qutie.spec --noconfirm
-# The release ships it twice: "Qutie Setup.exe" (opens the setup wizard, see
+# The release ships it twice: "Qutie-Setup.exe" (opens the setup wizard, see
 # qutie.app.main) and, once installed, "C:\Program Files\Qutie\Qutie.exe".
 import shutil
 from pathlib import Path
@@ -39,4 +39,4 @@ exe = EXE(
 )
 
 dist = Path(DISTPATH)
-shutil.copy2(dist / "Qutie.exe", dist / "Qutie Setup.exe")
+shutil.copy2(dist / "Qutie.exe", dist / "Qutie-Setup.exe")

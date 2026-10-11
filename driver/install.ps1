@@ -28,7 +28,7 @@
     File that receives the steps (only with -Quiet).
 
 .PARAMETER Executable
-    The Qutie app ("Qutie Setup.exe") to copy to Program Files as Qutie.exe and
+    The Qutie app ("Qutie-Setup.exe") to copy to Program Files as Qutie.exe and
     register in Installed apps (passed by the setup wizard).
 
 .PARAMETER Studio

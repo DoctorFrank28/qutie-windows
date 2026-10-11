@@ -8,7 +8,7 @@
 - --setup / --uninstall: the setup wizard.
 
 With no arguments, an executable whose name contains "setup" (the downloadable
-"Qutie Setup.exe") opens the wizard. Whoever starts the app from code passes --app
+"Qutie-Setup.exe") opens the wizard. Whoever starts the app from code passes --app
 explicitly, so the file name never decides (see winsys.launch_self).
 """
 

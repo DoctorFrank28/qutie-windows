@@ -10,7 +10,7 @@ Print on the **HPRT Qutie** Bluetooth label maker from any Windows app (Excel, b
 - **Print preview.** Every job opens a preview of the labels exactly as they will print: copies, single-strip view, same height across labels. Print or cancel from there.
 - **Fit to tape.** With the default paper size, *Fit to tape (A5)*, apps keep their usual margins. The Qutie app crops the content and scales it to the 12 mm tape, and the label is as long as it needs to be.
 - **Settings panel.** Battery, firmware, print density, auto power off, paper size, media type, tape feed and the margin on continuous tape.
-- **Setup wizard.** `Qutie Setup.exe` finds the printer over Bluetooth, pairs it and installs the driver, optionally with Qutie Studio. You can add or remove the Studio later. Uninstalling works from *Installed apps*.
+- **Setup wizard.** `Qutie-Setup.exe` finds the printer over Bluetooth, pairs it and installs the driver, optionally with Qutie Studio. You can add or remove the Studio later. Uninstalling works from *Installed apps*.
 - **Languages.** English, Italian, Spanish, French, German, Portuguese, Russian, Chinese and Japanese, following the Windows language.
 
 ![Qutie Studio: a freezer label in the dots view](.github/images/editor.png)
@@ -25,12 +25,12 @@ You need Windows 10 or 11 (x64) with Bluetooth, and a Qutie (or Q2).
 
 
 1. Turn the Qutie on and close the HerePrint / Sorticker app on your phone, because the printer accepts one connection at a time.
-2. Download `Qutie Setup.exe` from the [latest release](https://github.com/DoctorFrank28/qutie-windows/releases/latest) and run it. The file is not code-signed, so Windows SmartScreen may warn you: choose *More info › Run anyway*.
+2. Download `Qutie-Setup.exe` from the [latest release](https://github.com/DoctorFrank28/qutie-windows/releases/latest) and run it. The file is not code-signed, so Windows SmartScreen may warn you: choose *More info › Run anyway*.
 3. Choose **Driver and Qutie Studio** or **Driver only**, then follow the steps. Windows asks for administrator permission once, to install the driver.
 
 Then print from any app on the **Qutie** printer, or open **Qutie Studio** from the Start menu or the tray icon. Uninstall from *Settings › Apps › Installed apps › Qutie Studio and printer* (or *Qutie printer* with the driver only).
 
-To update, run the new `Qutie Setup.exe`: labels, templates and settings stay. *Help › Check for updates* in the Studio (or *About* in the printer settings) tells you when there is one. Found a bug? *Help › Report a problem* opens a [GitHub issue](https://github.com/DoctorFrank28/qutie-windows/issues) with the versions filled in.
+To update, run the new `Qutie-Setup.exe`: labels, templates and settings stay. *Help › Check for updates* in the Studio (or *About* in the printer settings) tells you when there is one. Found a bug? *Help › Report a problem* opens a [GitHub issue](https://github.com/DoctorFrank28/qutie-windows/issues) with the versions filled in.
 
 ### About the driver signature
 
@@ -120,7 +120,7 @@ uv run pyinstaller packaging/qutie.spec --noconfirm
 - **`--setup`** opens the setup wizard; **`--studio [file]`** opens Qutie Studio; **`--quick`** opens quick print.
 - **`uv run python -m qutie.app.designer`** serves the Studio at http://127.0.0.1:4180/designer.html, to work on it in a browser.
 - **`plugin\build.cmd`** builds `driver/amd64/QUTIEUI.DLL`. It needs Visual Studio 2022 with the C++ tools.
-- **`pyinstaller`** builds `dist/Qutie.exe` and `dist/Qutie Setup.exe`.
+- **`pyinstaller`** builds `dist/Qutie.exe` and `dist/Qutie-Setup.exe`.
 
 The driver can also be installed without the app: run `driver/Install.cmd` once the printer is paired. It then prints straight to the Bluetooth COM port, with no preview.
 
@@ -128,7 +128,7 @@ The driver can also be installed without the app: run `driver/Install.cmd` once 
 
 1. Set the new version in `pyproject.toml`, `src/qutie/__init__.py`, `driver/install.ps1` (`DisplayVersion`) and `driver/qutie.inf` (`DriverVer`), then run `uv lock`. `tests/test_release.py` checks that they match.
 2. Commit, then tag and push: `git tag v1.2.0` and `git push origin v1.2.0`.
-3. The [Release workflow](.github/workflows/release.yml) runs the tests, builds `Qutie Setup.exe` and attaches it to the GitHub release of that tag.
+3. The [Release workflow](.github/workflows/release.yml) runs the tests, builds `Qutie-Setup.exe` and attaches it to the GitHub release of that tag.
 
 ## License
 
