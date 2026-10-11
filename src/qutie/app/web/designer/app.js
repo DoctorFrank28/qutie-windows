@@ -498,7 +498,7 @@ const Studio = {
     }
     const p = this.printer;
     const media = S.doc.label.media === "continuous" ? T.mediaContinuousShort : T.mediaGapShort;
-    const printerText = p.state === "ok" ? `Qutie · ${fmtPercent(p.info.battery)} ·${p.info.paper === "continuous" ? T.mediaContinuousShort : T.mediaGapShort}` : p.state === "reading" ? T.printerReadingShort : p.state === "off" ? T.printerUnreachableShort : `Qutie · ${media}`;
+    const printerText = p.state === "ok" ? `Qutie · ${fmtPercent(p.info.battery)} · ${p.info.paper === "continuous" ? T.mediaContinuousShort : T.mediaGapShort}` : p.state === "reading" ? T.printerReadingShort : p.state === "off" ? T.printerUnreachableShort : `Qutie · ${media}`;
     clear(bar).append(
       h("span.mono", `${fmtNum(TAPE_MM, 0)} × ${fmtNum(L, 0)} mm · ${HEAD_DOTS} × ${W} ${T.dots} · ${DPI} dpi`),
       h("span.mono.st-mid", middle),

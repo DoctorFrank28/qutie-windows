@@ -25,7 +25,7 @@ from pathlib import Path
 import webview
 from PIL import Image, ImageFont
 
-from .. import __version__, codes, datasource, library, protocol, render, winsys
+from .. import __version__, codes, datasource, library, protocol, render, updates, winsys
 from ..config import Config
 from ..transport import Printer, PrinterError, find_mac
 from . import device
@@ -704,6 +704,13 @@ class DesignerApi:
 
     def open_setup(self, mode: str = "install") -> None:
         winsys.launch_self("--uninstall" if mode == "uninstall" else "--setup")
+
+    # -- the project on GitHub
+    def check_updates(self) -> dict:
+        return updates.check()
+
+    def open_page(self, name: str) -> bool:
+        return updates.open_page(name)
 
     def open_settings(self, section: str | None = None) -> None:
         if self._agent:

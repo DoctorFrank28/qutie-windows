@@ -23,7 +23,7 @@ STUDIO_STRINGS.ja = {
   menuFile: "ファイル", menuEdit: "編集", menuInsert: "挿入", menuArrange: "配置", menuView: "表示", menuPrinter: "プリンター", menuHelp: "ヘルプ",
   cmdNew: "新しいラベル", cmdNewFromTemplate: "テンプレートから新規作成…", cmdOpen: "開く…", openRecent: "最近使ったファイル", cmdSave: "保存",
   cmdSaveAs: "名前を付けて保存…", cmdSaveTemplate: "テンプレートとして保存…", cmdLinkData: "データを接続…", cmdExportPng: "PNG をエクスポート…",
-  cmdExportPdf: "シリーズの PDF をエクスポート…", cmdPrint: "印刷…", cmdPrintNow: "今すぐ印刷", cmdHome: "ホームに戻る", cmdBackToLabel: "ラベルに戻る", currentLabel: "開いているラベル", unsavedShort: "未保存の変更",
+  cmdExportPdf: "シリーズの PDF をエクスポート…", cmdPrint: "印刷…", cmdPrintNow: "今すぐ印刷", cmdHome: "ホームに戻る", cmdBackToLabel: "ラベルに戻る", currentLabel: "開いているラベル", unsavedShort: "未保存の変更", cmdCheckUpdates: "更新を確認", cmdReportProblem: "問題を報告…", sourceCode: "ソースコード", notNow: "後で", upToDate: (v) => `Qutie ${v} は最新バージョンです`, updateAvailable: (v) => `Qutie ${v} が利用可能です`, updateAvailableText: (v) => `現在のバージョンは ${v} です。新しい Qutie Setup.exe をダウンロードして実行してください。ラベルと設定はそのまま残ります。`, downloadUpdate: "ダウンロード", updateCheckFailed: "更新を確認できませんでした",
   cmdQuit: "Studio を閉じる", clearRecent: "一覧をクリア",
   cmdUndo: "元に戻す", cmdUndoWhat: (w) => `元に戻す: 「${w}」`, cmdRedo: "やり直し", cmdCut: "切り取り", cmdCopy: "コピー", cmdPaste: "貼り付け",
   cmdPasteText: "テキストのみ貼り付け", cmdCopyStyle: "スタイルをコピー", cmdPasteStyle: "スタイルを貼り付け", cmdDuplicate: "複製",

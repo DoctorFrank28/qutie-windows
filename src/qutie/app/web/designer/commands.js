@@ -154,6 +154,8 @@ command("guide", { label: () => T.cmdGuide, keys: "F1", run: () => Dialogs.guide
 command("ditherExamples", { label: () => T.cmdDitherExamples, run: () => Dialogs.ditherExamples() });
 command("whatsNew", { label: () => T.cmdWhatsNew, run: () => Dialogs.whatsNew() });
 command("about", { label: () => T.cmdAbout, icon: "info", run: () => Dialogs.about() });
+command("checkUpdates", { label: () => T.cmdCheckUpdates, icon: "refresh", run: () => Dialogs.checkUpdates() });
+command("reportProblem", { label: () => T.cmdReportProblem, icon: "message", run: () => api("open_page", "issues").catch(() => {}) });
 
 // ------------------------------------------------------------------ menu bar
 const MENUS = {
@@ -195,7 +197,7 @@ const MENUS = {
     "-", { header: T.media }, mi("mediaGap"), mi("mediaContinuous"), mi("mediaInserted"),
     "-", mi("density"), mi("autoOff"), mi("printerSettings"), mi("pairAnother"),
   ],
-  help: () => [mi("shortcuts"), mi("palette"), mi("guide"), mi("ditherExamples"), "-", mi("whatsNew"), "-", mi("about")],
+  help: () => [mi("shortcuts"), mi("palette"), mi("guide"), mi("ditherExamples"), "-", mi("whatsNew"), mi("checkUpdates"), mi("reportProblem"), "-", mi("about")],
 };
 
 function alignMenu() {

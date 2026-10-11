@@ -58,6 +58,7 @@ function offlineApi() {
     qr_options: () => later({ chars: 0, ecc: {} }),
     verify_codes: () => later({ ok: null, found: [], missing: [] }),
     printer: () => fail(), apply_printer: () => fail(), feed: () => fail(), test_label: () => fail(),
+    check_updates: () => fail(), open_page: () => later(false),
     print_labels: () => fail(600), print_status: () => later({ running: false }), stop_print: () => later(null),
     history: () => later({ entries: [], stats: null }), history_detail: () => later(null), history_remove: () => later(null), history_clear: () => later(null), reprint: () => fail(),
     autosave: () => later(null), restore: () => later(null), discard_recovery: () => later(null), set_dirty: () => later(null), current_path: () => later(null),

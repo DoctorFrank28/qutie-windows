@@ -224,9 +224,32 @@ const VIEWS = {
         [T.driver, esc(o.printer?.DriverName || "—")],
         [T.printerName, esc(o.printer?.Name || "—")],
       ]) + `<p class="hint">${T.aboutText}</p>`)
+      + card(`<div class="setting"><div class="setting-text"><label>${T.updates}</label><p class="hint" id="update-status" aria-live="polite">${T.updatesHint}</p></div>
+          <div class="setting-control"><button class="outline" id="check-updates" type="button">${T.checkUpdates}</button></div></div>
+          <div class="actions"><button class="ghost" id="report-problem" type="button">${T.reportProblem}</button>
+          <button class="ghost" id="source-code" type="button">${T.sourceCode}</button></div>`)
       + card(`<div class="setting"><div class="setting-text"><label>${T.uninstallApp}</label><p class="hint">${T.uninstallHint}</p></div>
           <div class="setting-control"><button class="outline danger" id="uninstall" type="button">${T.uninstall}</button></div></div>`));
     $("#uninstall").addEventListener("click", () => api("open_setup", "uninstall"));
+    $("#report-problem").addEventListener("click", () => api("open_page", "issues"));
+    $("#source-code").addEventListener("click", () => api("open_page", "repository"));
+    const check = $("#check-updates"), status = $("#update-status");
+    check.addEventListener("click", async () => {
+      if (check.dataset.download) { api("open_page", "releases"); return; }
+      check.disabled = true;
+      status.textContent = T.checkingUpdates;
+      const r = await api("check_updates").catch((e) => ({ ok: false, detail: String(e) }));
+      check.disabled = false;
+      if (!r.ok) status.textContent = `${T.updateCheckFailed}: ${r.detail || ""}`;
+      else if (!r.newer) status.textContent = T.upToDate(r.current);
+      else {
+        // A newer release: the same button now opens its download page.
+        status.textContent = T.updateAvailable(r.latest);
+        check.textContent = T.download;
+        check.className = "primary";
+        check.dataset.download = "1";
+      }
+    });
   },
 };
 
@@ -266,5 +289,6 @@ function fakeApi() {
     set_defaults: (c) => later(300, { ok: true, defaults: Object.assign(defaults, c) }),
     feed: () => later(300, { ok: true }), test_label: () => later(500, { ok: true }), test_windows: () => later(500, { ok: true }),
     set_preview: () => {}, set_autostart: () => {}, open_windows: () => {}, open_setup: () => {}, close: () => {},
+    check_updates: () => later(800, { ok: true, current: "1.0.0", latest: "1.2.0", newer: true }), open_page: () => {},
   };
 }

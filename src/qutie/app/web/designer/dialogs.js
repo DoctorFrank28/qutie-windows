@@ -130,7 +130,9 @@ const Dialogs = {
     const media = doc.label.media === "continuous";
     col.append(h("div.box", h("h3", T.media),
       h("div", media ? T.mediaLineContinuous(fmtNum(labelLength(doc), 0), labelFeed(doc), doc.label.auto) : T.mediaLineGap(fmtNum(labelLength(doc), 0), labelFeed(doc))),
-      p.state === "ok" ? notice(T.printerLine(p.info.battery, p.info.paper === "continuous" ? T.continuousInserted : T.gapInserted), { kind: p.info.paper !== (media ? "continuous" : "gap") ? "warn" : "" })
+      p.state === "ok" ? (p.info.paper !== (media ? "continuous" : "gap")
+        ? notice(`${p.info.paper === "continuous" ? T.mismatchContinuous : T.mismatchGap} ${T.printerLine(p.info.battery, p.info.paper === "continuous" ? T.continuousInserted : T.gapInserted)}`, { kind: "warn" })
+        : notice(T.printerLine(p.info.battery, p.info.paper === "continuous" ? T.continuousInserted : T.gapInserted)))
         : notice(p.state === "reading" ? T.printerReading : T.printerNotChecked, { action: button(T.check, { size: "sm", onClick: async () => { await Studio.refreshPrinter(true); render(); } }) })));
     const L = labelLength(doc);
     const seconds = Math.round(items.length * (2 + L / 25));
@@ -696,9 +698,25 @@ const Dialogs = {
     openDialog({
       title: `Qutie Studio ${v}`, width: 480, closeButton: true,
       body: h("div.about", h("p", T.aboutText), h("p.desc", T.aboutLicense),
-        h("dl.facts", h("dt", T.componentsInstalled), h("dd", Studio.state?.studio === false ? T.driverOnly : T.driverAndStudio))),
+        h("dl.facts", h("dt", T.componentsInstalled), h("dd", Studio.state?.studio === false ? T.driverOnly : T.driverAndStudio)),
+        h("div.row",
+          button(T.cmdCheckUpdates, { size: "sm", icon: "refresh", onClick: () => this.checkUpdates() }),
+          button(T.cmdReportProblem, { size: "sm", variant: "ghost", icon: "message", onClick: () => run("reportProblem") }),
+          button(T.sourceCode, { size: "sm", variant: "ghost", icon: "link", onClick: () => api("open_page", "repository").catch(() => {}) }))),
       footer: [{ label: T.modifyInstall, action: () => { api("open_setup", "install"); } }, { label: T.close, variant: "primary" }],
     });
+  },
+
+  /** Compare with the latest release on GitHub; offer the download page when there is a newer one. */
+  async checkUpdates() {
+    const r = await api("check_updates").catch((e) => ({ ok: false, detail: String(e) }));
+    if (!r.ok) { toast(T.updateCheckFailed, { kind: "error", detail: r.detail }); return; }
+    if (!r.newer) { toast(T.upToDate(r.current), { kind: "ok" }); return; }
+    const download = await ask({
+      title: T.updateAvailable(r.latest), text: T.updateAvailableText(r.current),
+      buttons: [{ label: T.notNow, variant: "ghost", value: false }, { label: T.downloadUpdate, variant: "primary", value: true, autofocus: true }],
+    });
+    if (download) api("open_page", "releases").catch(() => {});
   },
 
   /** The linked file changed its columns: link to the renamed one, keep the copy, or leave it. */

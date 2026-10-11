@@ -24,7 +24,7 @@ from pathlib import Path
 import pystray
 import webview
 
-from .. import __version__, library, render, spool, winsys
+from .. import __version__, library, render, spool, updates, winsys
 from ..config import Config
 from . import device
 from .designer import DesignerApi, encode_png
@@ -197,6 +197,12 @@ class SettingsApi:
 
     def open_windows(self, kind: str) -> None:
         winsys.open_printer_dialog(kind)
+
+    def check_updates(self) -> dict:
+        return updates.check()
+
+    def open_page(self, name: str) -> bool:
+        return updates.open_page(name)
 
     def open_setup(self, mode: str = "install") -> None:
         winsys.launch_self("--uninstall" if mode == "uninstall" else "--setup")

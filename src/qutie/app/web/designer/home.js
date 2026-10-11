@@ -195,7 +195,7 @@ const Home = {
       h("div.row",
         seg([{ value: "all", label: `${T.catAll} · ${count("all")}` }, { value: "kitchen", label: `${T.catKitchen} · ${count("kitchen")}` }, { value: "home", label: `${T.catHome} · ${count("home")}` }, { value: "data", label: `${T.catData} · ${count("data")}` }], this.tplCat, (v) => { this.tplCat = v; this.rerender(); }),
         h("span.spacer"),
-        seg([{ value: "any", label: T.anyLength }, { value: "gap", label: T.gapShort }, { value: "continuous", label: T.continuousShort }], this.tplMedia, (v) => { this.tplMedia = v; this.rerender(); })));
+        seg([{ value: "any", label: T.anyLength }, { value: "gap", label: T.mediaGap }, { value: "continuous", label: T.mediaContinuous }], this.tplMedia, (v) => { this.tplMedia = v; this.rerender(); })));
     const q = this.query.toLowerCase();
     const keep = (name, note, cats, med) => (!q || `${name} ${note}`.toLowerCase().includes(q)) && (this.tplCat === "all" || cats.includes(this.tplCat)) && (this.tplMedia === "any" || med === this.tplMedia);
     const mine = user.filter((u) => keep(u.name, u.description, [u.category, "data"].filter(Boolean), u.media));
