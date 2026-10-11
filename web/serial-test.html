@@ -125,12 +125,12 @@ dd { margin: 0; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
     <div class="row between">
       <span class="muted" id="mode-label">LE sending</span>
       <div class="seg" role="radiogroup" aria-labelledby="mode-label" id="modes">
-        <button type="button" role="radio" data-mode="safe" aria-checked="true">Safe</button>
+        <button type="button" role="radio" data-mode="safe" aria-checked="false">Safe</button>
         <button type="button" role="radio" data-mode="fast" aria-checked="false">Fast</button>
-        <button type="button" role="radio" data-mode="max" aria-checked="false">Max</button>
+        <button type="button" role="radio" data-mode="max" aria-checked="true">Max</button>
       </div>
     </div>
-    <p class="muted">Safe: 20-byte packets, each acknowledged. Fast and Max: 100 or 180 bytes without waiting. Try Fast if Safe prints well but slowly.</p>
+    <p class="muted">Max (180-byte packets, not acknowledged) prints in one go. Safe sends 20 bytes at a time and is slower than the print head: the Qutie stops between blocks and leaves gaps.</p>
   </section>
 
   <section class="card" aria-labelledby="printer-title">
@@ -191,7 +191,7 @@ const MODES = { safe: { chunk: 20, response: true }, fast: { chunk: 100, respons
 
 let port = null, writer = null, reader = null, rx = new Uint8Array(0), waiters = [];
 let transport = null; // { kind: "le" | "serial", write(bytes), close() }
-let mode = "safe";
+let mode = "max";
 let flow = { count: 0, last: "" }; // FF03 notifications since the last summary
 let length = "40";
 
@@ -501,16 +501,16 @@ async function print() {
     const parts = jobBytes(label);
     const total = parts.reduce((s, p) => s + p.length, 0);
     log(`print "${$("text").value}": ${label.canvas.width} × ${DOTS} dots, ${parts.length} writes, ${total} bytes`);
-    const blocks = parts.filter((p) => p.length === 12 && p[0] === GS && p[1] === 0x76).length;
-    const from = rx.length, started = performance.now();
+    const started = performance.now();
     flow.count = 0;
     for (const p of parts) await send(p);
     log(`sent in ${Math.round(performance.now() - started)} ms, waiting for the printer…`);
-    // The Qutie confirms every raster block ("dithering_finish") as it prints it.
-    const finished = (b) => ascii(b).split("dithering_finish").length - 1;
-    const done = await waitFor(from, (b) => finished(b) >= blocks, 15000);
-    if (done) log(`printed: ${blocks} blocks confirmed after ${Math.round(performance.now() - started)} ms`);
-    else log(`only ${finished(rx.slice(from))} of ${blocks} blocks confirmed within 15 s`, "err");
+    // "dithering_finish" means the Qutie has printed all it received: the first one after the
+    // last byte is the end of the label (sent slowly, it also comes between blocks).
+    const from = rx.length;
+    const done = await waitFor(from, (b) => ascii(b).includes("dithering_finish"), 15000);
+    if (done) log(`printed: confirmed ${Math.round(performance.now() - started)} ms after the start`);
+    else log("no confirmation within 15 s (the label may still have printed)", "err");
   } catch (e) {
     log(`print: ${e.name}: ${e.message}`, "err");
   } finally {
