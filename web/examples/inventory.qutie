@@ -1,0 +1,126 @@
+{
+ "format": "qutie-label",
+ "version": 2,
+ "id": "ae1b1443-10f9-4462-9e59-ea022f9828f3",
+ "name": "Numbered inventory",
+ "label": {
+  "media": "gap",
+  "length": 50,
+  "auto": false,
+  "margin": 2,
+  "feed": 10
+ },
+ "objects": [
+  {
+   "id": "omv4ehdpej",
+   "type": "barcode",
+   "name": "Code",
+   "x": 1,
+   "y": 0.6,
+   "w": 30,
+   "h": 10.8,
+   "rotation": 0,
+   "hidden": false,
+   "locked": false,
+   "group": null,
+   "dither": {
+    "mode": "auto",
+    "threshold": 128,
+    "cell": 6,
+    "angle": 45
+   },
+   "visible": {
+    "mode": "always",
+    "join": "and",
+    "rules": []
+   },
+   "empty": "hide",
+   "closeGap": false,
+   "kind": "code128",
+   "content": "INV-{n}",
+   "textPos": "below",
+   "textSize": 6,
+   "font": "Consolas",
+   "moduleDots": 0
+  },
+  {
+   "id": "omv4ehdpek",
+   "type": "text",
+   "name": "Number",
+   "x": 32,
+   "y": 1,
+   "w": 17,
+   "h": 10,
+   "rotation": 0,
+   "hidden": false,
+   "locked": false,
+   "group": null,
+   "dither": {
+    "mode": "auto",
+    "threshold": 128,
+    "cell": 6,
+    "angle": 45
+   },
+   "visible": {
+    "mode": "always",
+    "join": "and",
+    "rules": []
+   },
+   "empty": "hide",
+   "closeGap": false,
+   "text": "#{n}",
+   "font": "Bahnschrift",
+   "size": 24,
+   "autoFit": true,
+   "bold": true,
+   "italic": false,
+   "underline": false,
+   "strike": false,
+   "align": "center",
+   "valign": "middle",
+   "spacing": 0,
+   "lineHeight": 1.05,
+   "transform": "none",
+   "wrap": false,
+   "fill": {
+    "type": "solid",
+    "ink": 100,
+    "pattern": "diag",
+    "scale": 5,
+    "weight": 1,
+    "from": 100,
+    "to": 0,
+    "angle": 0
+   },
+   "stroke": {
+    "width": 0,
+    "ink": 100,
+    "dash": "solid"
+   },
+   "background": {
+    "type": "none",
+    "ink": 100,
+    "pattern": "diag",
+    "scale": 5,
+    "weight": 1,
+    "from": 100,
+    "to": 0,
+    "angle": 0
+   },
+   "padding": 0,
+   "radius": 0,
+   "symbol": false
+  }
+ ],
+ "assets": {},
+ "series": {
+  "start": 1,
+  "step": 1,
+  "count": 10,
+  "pad": 3,
+  "repeat": 1,
+  "collate": true,
+  "advance": true
+ },
+ "data": null
+}

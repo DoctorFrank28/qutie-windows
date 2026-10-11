@@ -1,0 +1,195 @@
+{
+ "format": "qutie-label",
+ "version": 2,
+ "id": "a2f33411-f57e-42cd-822f-4ff39615c193",
+ "name": "Spice jar",
+ "label": {
+  "media": "gap",
+  "length": 40,
+  "auto": false,
+  "margin": 2,
+  "feed": 10
+ },
+ "objects": [
+  {
+   "id": "omv4ehdpd1",
+   "type": "text",
+   "name": "Title",
+   "x": 1.5,
+   "y": 0.6,
+   "w": 37,
+   "h": 7.4,
+   "rotation": 0,
+   "hidden": false,
+   "locked": false,
+   "group": null,
+   "dither": {
+    "mode": "auto",
+    "threshold": 128,
+    "cell": 6,
+    "angle": 45
+   },
+   "visible": {
+    "mode": "always",
+    "join": "and",
+    "rules": []
+   },
+   "empty": "hide",
+   "closeGap": false,
+   "text": "Oregano",
+   "font": "Georgia",
+   "size": 24,
+   "autoFit": true,
+   "bold": true,
+   "italic": false,
+   "underline": false,
+   "strike": false,
+   "align": "center",
+   "valign": "middle",
+   "spacing": 0,
+   "lineHeight": 1.05,
+   "transform": "none",
+   "wrap": false,
+   "fill": {
+    "type": "solid",
+    "ink": 100,
+    "pattern": "diag",
+    "scale": 5,
+    "weight": 1,
+    "from": 100,
+    "to": 0,
+    "angle": 0
+   },
+   "stroke": {
+    "width": 0,
+    "ink": 100,
+    "dash": "solid"
+   },
+   "background": {
+    "type": "none",
+    "ink": 100,
+    "pattern": "diag",
+    "scale": 5,
+    "weight": 1,
+    "from": 100,
+    "to": 0,
+    "angle": 0
+   },
+   "padding": 0,
+   "radius": 0,
+   "symbol": false
+  },
+  {
+   "id": "omv4ehdpd2",
+   "type": "line",
+   "name": "Rule",
+   "x": 8,
+   "y": 7.9,
+   "w": 24,
+   "h": 0.6,
+   "rotation": 0,
+   "hidden": false,
+   "locked": false,
+   "group": null,
+   "dither": {
+    "mode": "auto",
+    "threshold": 128,
+    "cell": 6,
+    "angle": 45
+   },
+   "visible": {
+    "mode": "always",
+    "join": "and",
+    "rules": []
+   },
+   "empty": "hide",
+   "closeGap": false,
+   "stroke": {
+    "width": 0.25,
+    "ink": 100,
+    "dash": "dotted"
+   },
+   "arrowStart": false,
+   "arrowEnd": false
+  },
+  {
+   "id": "omv4ehdpd3",
+   "type": "text",
+   "name": "Date",
+   "x": 1.5,
+   "y": 8.4,
+   "w": 37,
+   "h": 3,
+   "rotation": 0,
+   "hidden": false,
+   "locked": false,
+   "group": null,
+   "dither": {
+    "mode": "auto",
+    "threshold": 128,
+    "cell": 6,
+    "angle": 45
+   },
+   "visible": {
+    "mode": "always",
+    "join": "and",
+    "rules": []
+   },
+   "empty": "hide",
+   "closeGap": false,
+   "text": "{date}",
+   "font": "Segoe UI",
+   "size": 24,
+   "autoFit": true,
+   "bold": false,
+   "italic": false,
+   "underline": false,
+   "strike": false,
+   "align": "center",
+   "valign": "middle",
+   "spacing": 0,
+   "lineHeight": 1.05,
+   "transform": "none",
+   "wrap": false,
+   "fill": {
+    "type": "solid",
+    "ink": 100,
+    "pattern": "diag",
+    "scale": 5,
+    "weight": 1,
+    "from": 100,
+    "to": 0,
+    "angle": 0
+   },
+   "stroke": {
+    "width": 0,
+    "ink": 100,
+    "dash": "solid"
+   },
+   "background": {
+    "type": "none",
+    "ink": 100,
+    "pattern": "diag",
+    "scale": 5,
+    "weight": 1,
+    "from": 100,
+    "to": 0,
+    "angle": 0
+   },
+   "padding": 0,
+   "radius": 0,
+   "symbol": false
+  }
+ ],
+ "assets": {},
+ "series": {
+  "start": 1,
+  "step": 1,
+  "count": 10,
+  "pad": 0,
+  "repeat": 1,
+  "collate": true,
+  "advance": true
+ },
+ "data": null
+}

@@ -1,0 +1,209 @@
+{
+ "format": "qutie-label",
+ "version": 2,
+ "id": "a4e01a9c-eb78-478b-9df2-51142ebc14b2",
+ "name": "Boxes from a list",
+ "label": {
+  "media": "gap",
+  "length": 40,
+  "auto": false,
+  "margin": 2,
+  "feed": 10
+ },
+ "objects": [
+  {
+   "id": "omv4ehdpel",
+   "type": "text",
+   "name": "Title",
+   "x": 1,
+   "y": 0.6,
+   "w": 38,
+   "h": 7,
+   "rotation": 0,
+   "hidden": false,
+   "locked": false,
+   "group": null,
+   "dither": {
+    "mode": "auto",
+    "threshold": 128,
+    "cell": 6,
+    "angle": 45
+   },
+   "visible": {
+    "mode": "always",
+    "join": "and",
+    "rules": []
+   },
+   "empty": "hide",
+   "closeGap": false,
+   "text": "«Box»",
+   "font": "Segoe UI",
+   "size": 24,
+   "autoFit": true,
+   "bold": true,
+   "italic": false,
+   "underline": false,
+   "strike": false,
+   "align": "center",
+   "valign": "middle",
+   "spacing": 0,
+   "lineHeight": 1.05,
+   "transform": "none",
+   "wrap": false,
+   "fill": {
+    "type": "solid",
+    "ink": 100,
+    "pattern": "diag",
+    "scale": 5,
+    "weight": 1,
+    "from": 100,
+    "to": 0,
+    "angle": 0
+   },
+   "stroke": {
+    "width": 0,
+    "ink": 100,
+    "dash": "solid"
+   },
+   "background": {
+    "type": "none",
+    "ink": 100,
+    "pattern": "diag",
+    "scale": 5,
+    "weight": 1,
+    "from": 100,
+    "to": 0,
+    "angle": 0
+   },
+   "padding": 0,
+   "radius": 0,
+   "symbol": false
+  },
+  {
+   "id": "omv4ehdpem",
+   "type": "text",
+   "name": "Detail",
+   "x": 1,
+   "y": 7.8,
+   "w": 38,
+   "h": 3.6,
+   "rotation": 0,
+   "hidden": false,
+   "locked": false,
+   "group": null,
+   "dither": {
+    "mode": "auto",
+    "threshold": 128,
+    "cell": 6,
+    "angle": 45
+   },
+   "visible": {
+    "mode": "always",
+    "join": "and",
+    "rules": []
+   },
+   "empty": "hide",
+   "closeGap": false,
+   "text": "«Contents»",
+   "font": "Segoe UI",
+   "size": 24,
+   "autoFit": true,
+   "bold": false,
+   "italic": false,
+   "underline": false,
+   "strike": false,
+   "align": "center",
+   "valign": "middle",
+   "spacing": 0,
+   "lineHeight": 1.05,
+   "transform": "none",
+   "wrap": false,
+   "fill": {
+    "type": "solid",
+    "ink": 100,
+    "pattern": "diag",
+    "scale": 5,
+    "weight": 1,
+    "from": 100,
+    "to": 0,
+    "angle": 0
+   },
+   "stroke": {
+    "width": 0,
+    "ink": 100,
+    "dash": "solid"
+   },
+   "background": {
+    "type": "none",
+    "ink": 100,
+    "pattern": "diag",
+    "scale": 5,
+    "weight": 1,
+    "from": 100,
+    "to": 0,
+    "angle": 0
+   },
+   "padding": 0,
+   "radius": 0,
+   "symbol": false
+  }
+ ],
+ "assets": {},
+ "series": {
+  "start": 1,
+  "step": 1,
+  "count": 10,
+  "pad": 0,
+  "repeat": 1,
+  "collate": true,
+  "advance": true
+ },
+ "data": {
+  "source": {
+   "kind": "table",
+   "name": "Table",
+   "path": null,
+   "sheet": null,
+   "header": true,
+   "link": "reread",
+   "read": null,
+   "modified": null
+  },
+  "columns": [
+   {
+    "name": "Box",
+    "type": "text"
+   },
+   {
+    "name": "Contents",
+    "type": "text"
+   }
+  ],
+  "rows": [
+   [
+    "Box 1",
+    "cables and chargers"
+   ],
+   [
+    "Box 2",
+    "books"
+   ],
+   [
+    "Box 3",
+    "winter clothes"
+   ]
+  ],
+  "checked": [],
+  "formulas": [],
+  "filter": [],
+  "sort": null,
+  "copies": null,
+  "current": 0,
+  "which": "all",
+  "range": {
+   "from": 1,
+   "to": 1
+  },
+  "search": ""
+ }
+}

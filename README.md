@@ -84,7 +84,7 @@ Worked out, for interoperability, by studying how the official app talks to the 
 
 | What | Bytes |
 | --- | --- |
-| Link | Bluetooth classic SPP (RFCOMM channel 1) |
+| Link | Bluetooth classic SPP (RFCOMM channel 1), or Bluetooth LE: service `FF00`, write to `FF02`, replies on `FF01`, flow control on `FF03` |
 | Optional handshake | `1B 1C "set mm" k1 k2`. An `OK` reply means later writes are XORed with `k1+k2`. Plain data works too. |
 | Raster block | `1D 76 30 30` · width in bytes (2) · rows (2) · LZO length (4) · LZO1X data |
 | End of a gap label | `1D 66 nL nH` (length in dots, 203 dpi) |
@@ -92,7 +92,33 @@ Worked out, for interoperability, by studying how the official app talks to the 
 | Density / auto power off | `1D "setc" n` / `1D "sett" nL nH` (seconds) |
 | Status / info | `1B 12 73` (17 bytes) / `1B 12 64` (143 bytes) |
 
-The print head is 96 dots wide (12 mm at 203 dpi). In the status reply, paper type 0 is the continuous roll.
+The print head is 96 dots wide (12 mm at 203 dpi). In the status reply, paper type 0 is the continuous roll. The printer prints each raster block as soon as it gets it and sends `dithering_finish` when it has printed all it received; over Bluetooth LE send 180-byte packets without waiting, or it stops between blocks and leaves gaps.
+
+## JavaScript library
+
+[`qutie.js`](web/qutie.js) prints on the Qutie straight from a web page, with no app and no server: over **Bluetooth LE** (Web Bluetooth: Chrome and Edge on Android, Windows, macOS, Linux and ChromeOS) or the **Bluetooth serial port** (Web Serial: Chrome and Edge on desktop). It needs HTTPS. Safari, Firefox and iPhone have neither API.
+
+Try it on the [demo page](https://doctorfrank28.github.io/qutie-windows/), or use it:
+
+```js
+import Qutie from "https://doctorfrank28.github.io/qutie-windows/qutie.js";
+
+button.onclick = async () => {
+  const printer = await Qutie.connect();          // Chrome shows the nearby Qutie
+  console.log(await printer.status());            // { battery: 82, paper: "continuous", density: 95, … }
+  await printer.printText("Spices", { length: 30 });
+  await printer.print("labels/jar.qutie", { fields: { Name: "Oregano" } });          // a Qutie Studio label
+  await printer.print(doc, { rows: [{ Box: "1", Contents: "cables" }, { Box: "2", Contents: "books" }] });
+};
+```
+
+- **Labels from Qutie Studio** print as in the Studio: the library draws them with the Studio's own engine (fields and formulas, `{date}` and the other variables, the counter, conditional visibility, copies, every fill and dithering). `fields` fills in one label, `rows` makes one label per row; without either the rows saved in the file print. Other options: `copies`, `start` and `count` for the counter, `now` for the date, `onProgress`.
+- `printer.printImage(file, { length: "auto" })` prints a picture; `printer.feed()`, `setDensity()`, `setAutoOff()`, `info()` and `disconnect()` do what they say; a `disconnect` event tells when the printer goes away.
+- `Qutie.preview(label, options)` returns canvases with the printed dots, `Qutie.fields(label)` the fields a label can be given, and `Qutie.setLanguage("it")` the language of dates and numbers.
+- Barcodes are the Studio's (Code 128, EAN-13/8, UPC-A, ITF-14, Code 39, Codabar); QR codes follow the reference encoder. Micro QR is not available in the browser.
+- Fonts are the device's: a label made with Segoe UI uses the system sans-serif on Android.
+
+`web/qutie.js` is built from [`js/`](js) and the Studio's engine by `tools/build_js.py`; [`web/serial-test.html`](web/serial-test.html) is a lower-level connection test that logs every byte.
 
 ## Command line
 
@@ -111,6 +137,7 @@ uv run qutie text "Test" --preview test.png
 uv sync
 uv run pytest
 uv run python -m qutie.app.designer
+uv run python tools/build_js.py
 uv run qutie-app --setup
 plugin\build.cmd
 uv run python packaging/make_icon.py

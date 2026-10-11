@@ -1,0 +1,230 @@
+{
+ "format": "qutie-label",
+ "version": 2,
+ "id": "b6b29c75-4b56-4d9d-9a81-13169dde2817",
+ "name": "Freezer",
+ "label": {
+  "media": "gap",
+  "length": 50,
+  "auto": false,
+  "margin": 2,
+  "feed": 10
+ },
+ "objects": [
+  {
+   "id": "omv4ehdpd4",
+   "type": "text",
+   "name": "Symbol",
+   "x": 1,
+   "y": 1,
+   "w": 10,
+   "h": 10,
+   "rotation": 0,
+   "hidden": false,
+   "locked": false,
+   "group": null,
+   "dither": {
+    "mode": "auto",
+    "threshold": 128,
+    "cell": 6,
+    "angle": 45
+   },
+   "visible": {
+    "mode": "always",
+    "join": "and",
+    "rules": []
+   },
+   "empty": "hide",
+   "closeGap": false,
+   "text": "❄",
+   "font": "Segoe UI Symbol",
+   "size": 24,
+   "autoFit": true,
+   "bold": false,
+   "italic": false,
+   "underline": false,
+   "strike": false,
+   "align": "center",
+   "valign": "middle",
+   "spacing": 0,
+   "lineHeight": 1.05,
+   "transform": "none",
+   "wrap": false,
+   "fill": {
+    "type": "solid",
+    "ink": 100,
+    "pattern": "diag",
+    "scale": 5,
+    "weight": 1,
+    "from": 100,
+    "to": 0,
+    "angle": 0
+   },
+   "stroke": {
+    "width": 0,
+    "ink": 100,
+    "dash": "solid"
+   },
+   "background": {
+    "type": "none",
+    "ink": 100,
+    "pattern": "diag",
+    "scale": 5,
+    "weight": 1,
+    "from": 100,
+    "to": 0,
+    "angle": 0
+   },
+   "padding": 0,
+   "radius": 0,
+   "symbol": true
+  },
+  {
+   "id": "omv4ehdpd5",
+   "type": "text",
+   "name": "Title",
+   "x": 12,
+   "y": 0.6,
+   "w": 37,
+   "h": 6.4,
+   "rotation": 0,
+   "hidden": false,
+   "locked": false,
+   "group": null,
+   "dither": {
+    "mode": "auto",
+    "threshold": 128,
+    "cell": 6,
+    "angle": 45
+   },
+   "visible": {
+    "mode": "always",
+    "join": "and",
+    "rules": []
+   },
+   "empty": "hide",
+   "closeGap": false,
+   "text": "Bolognese",
+   "font": "Segoe UI",
+   "size": 24,
+   "autoFit": true,
+   "bold": true,
+   "italic": false,
+   "underline": false,
+   "strike": false,
+   "align": "left",
+   "valign": "middle",
+   "spacing": 0,
+   "lineHeight": 1.05,
+   "transform": "none",
+   "wrap": false,
+   "fill": {
+    "type": "solid",
+    "ink": 100,
+    "pattern": "diag",
+    "scale": 5,
+    "weight": 1,
+    "from": 100,
+    "to": 0,
+    "angle": 0
+   },
+   "stroke": {
+    "width": 0,
+    "ink": 100,
+    "dash": "solid"
+   },
+   "background": {
+    "type": "none",
+    "ink": 100,
+    "pattern": "diag",
+    "scale": 5,
+    "weight": 1,
+    "from": 100,
+    "to": 0,
+    "angle": 0
+   },
+   "padding": 0,
+   "radius": 0,
+   "symbol": false
+  },
+  {
+   "id": "omv4ehdpd6",
+   "type": "text",
+   "name": "Date",
+   "x": 12,
+   "y": 7.4,
+   "w": 37,
+   "h": 3.8,
+   "rotation": 0,
+   "hidden": false,
+   "locked": false,
+   "group": null,
+   "dither": {
+    "mode": "auto",
+    "threshold": 128,
+    "cell": 6,
+    "angle": 45
+   },
+   "visible": {
+    "mode": "always",
+    "join": "and",
+    "rules": []
+   },
+   "empty": "hide",
+   "closeGap": false,
+   "text": "expires {date+90}",
+   "font": "Segoe UI",
+   "size": 24,
+   "autoFit": true,
+   "bold": false,
+   "italic": false,
+   "underline": false,
+   "strike": false,
+   "align": "left",
+   "valign": "middle",
+   "spacing": 0,
+   "lineHeight": 1.05,
+   "transform": "none",
+   "wrap": false,
+   "fill": {
+    "type": "solid",
+    "ink": 100,
+    "pattern": "diag",
+    "scale": 5,
+    "weight": 1,
+    "from": 100,
+    "to": 0,
+    "angle": 0
+   },
+   "stroke": {
+    "width": 0,
+    "ink": 100,
+    "dash": "solid"
+   },
+   "background": {
+    "type": "none",
+    "ink": 100,
+    "pattern": "diag",
+    "scale": 5,
+    "weight": 1,
+    "from": 100,
+    "to": 0,
+    "angle": 0
+   },
+   "padding": 0,
+   "radius": 0,
+   "symbol": false
+  }
+ ],
+ "assets": {},
+ "series": {
+  "start": 1,
+  "step": 1,
+  "count": 10,
+  "pad": 0,
+  "repeat": 1,
+  "collate": true,
+  "advance": true
+ },
+ "data": null
+}

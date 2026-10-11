@@ -1,0 +1,357 @@
+{
+ "format": "qutie-label",
+ "version": 2,
+ "id": "cc1d1bb4-9340-475a-9282-7c05b1fa2352",
+ "name": "Pantry",
+ "label": {
+  "media": "gap",
+  "length": 40,
+  "auto": false,
+  "margin": 2,
+  "feed": 10
+ },
+ "objects": [
+  {
+   "id": "omv4ehdpes",
+   "type": "text",
+   "name": "Title",
+   "x": 1.5,
+   "y": 0.6,
+   "w": 28,
+   "h": 6.6,
+   "rotation": 0,
+   "hidden": false,
+   "locked": false,
+   "group": null,
+   "dither": {
+    "mode": "auto",
+    "threshold": 128,
+    "cell": 6,
+    "angle": 45
+   },
+   "visible": {
+    "mode": "always",
+    "join": "and",
+    "rules": []
+   },
+   "empty": "hide",
+   "closeGap": false,
+   "text": "«Name»",
+   "font": "Georgia",
+   "size": 24,
+   "autoFit": true,
+   "bold": true,
+   "italic": false,
+   "underline": false,
+   "strike": false,
+   "align": "center",
+   "valign": "middle",
+   "spacing": 0,
+   "lineHeight": 1.05,
+   "transform": "none",
+   "wrap": false,
+   "fill": {
+    "type": "solid",
+    "ink": 100,
+    "pattern": "diag",
+    "scale": 5,
+    "weight": 1,
+    "from": 100,
+    "to": 0,
+    "angle": 0
+   },
+   "stroke": {
+    "width": 0,
+    "ink": 100,
+    "dash": "solid"
+   },
+   "background": {
+    "type": "none",
+    "ink": 100,
+    "pattern": "diag",
+    "scale": 5,
+    "weight": 1,
+    "from": 100,
+    "to": 0,
+    "angle": 0
+   },
+   "padding": 0,
+   "radius": 0,
+   "symbol": false
+  },
+  {
+   "id": "omv4ehdpet",
+   "type": "line",
+   "name": "Rule",
+   "x": 6,
+   "y": 7.5,
+   "w": 18,
+   "h": 0.6,
+   "rotation": 0,
+   "hidden": false,
+   "locked": false,
+   "group": null,
+   "dither": {
+    "mode": "auto",
+    "threshold": 128,
+    "cell": 6,
+    "angle": 45
+   },
+   "visible": {
+    "mode": "always",
+    "join": "and",
+    "rules": []
+   },
+   "empty": "hide",
+   "closeGap": false,
+   "stroke": {
+    "width": 0.25,
+    "ink": 100,
+    "dash": "dotted"
+   },
+   "arrowStart": false,
+   "arrowEnd": false
+  },
+  {
+   "id": "omv4ehdpeu",
+   "type": "text",
+   "name": "Date",
+   "x": 1.5,
+   "y": 8.1,
+   "w": 28,
+   "h": 3.3,
+   "rotation": 0,
+   "hidden": false,
+   "locked": false,
+   "group": null,
+   "dither": {
+    "mode": "auto",
+    "threshold": 128,
+    "cell": 6,
+    "angle": 45
+   },
+   "visible": {
+    "mode": "always",
+    "join": "and",
+    "rules": []
+   },
+   "empty": "hide",
+   "closeGap": false,
+   "text": "expires «Expiry»",
+   "font": "Segoe UI",
+   "size": 24,
+   "autoFit": true,
+   "bold": false,
+   "italic": false,
+   "underline": false,
+   "strike": false,
+   "align": "center",
+   "valign": "middle",
+   "spacing": 0,
+   "lineHeight": 1.05,
+   "transform": "none",
+   "wrap": false,
+   "fill": {
+    "type": "solid",
+    "ink": 100,
+    "pattern": "diag",
+    "scale": 5,
+    "weight": 1,
+    "from": 100,
+    "to": 0,
+    "angle": 0
+   },
+   "stroke": {
+    "width": 0,
+    "ink": 100,
+    "dash": "solid"
+   },
+   "background": {
+    "type": "none",
+    "ink": 100,
+    "pattern": "diag",
+    "scale": 5,
+    "weight": 1,
+    "from": 100,
+    "to": 0,
+    "angle": 0
+   },
+   "padding": 0,
+   "radius": 0,
+   "symbol": false
+  },
+  {
+   "id": "omv4ehdpev",
+   "type": "text",
+   "name": "Badge",
+   "x": 30.5,
+   "y": 3.4,
+   "w": 8.5,
+   "h": 5,
+   "rotation": 0,
+   "hidden": false,
+   "locked": false,
+   "group": null,
+   "dither": {
+    "mode": "auto",
+    "threshold": 128,
+    "cell": 6,
+    "angle": 45
+   },
+   "visible": {
+    "mode": "if",
+    "join": "and",
+    "rules": [
+     {
+      "field": "Spicy",
+      "op": "true",
+      "value": ""
+     }
+    ]
+   },
+   "empty": "hide",
+   "closeGap": false,
+   "text": "HOT",
+   "font": "Segoe UI",
+   "size": 24,
+   "autoFit": true,
+   "bold": true,
+   "italic": false,
+   "underline": false,
+   "strike": false,
+   "align": "center",
+   "valign": "middle",
+   "spacing": 0,
+   "lineHeight": 1.05,
+   "transform": "none",
+   "wrap": false,
+   "fill": {
+    "type": "solid",
+    "ink": 0,
+    "pattern": "diag",
+    "scale": 5,
+    "weight": 1,
+    "from": 100,
+    "to": 0,
+    "angle": 0
+   },
+   "stroke": {
+    "width": 0,
+    "ink": 100,
+    "dash": "solid"
+   },
+   "background": {
+    "type": "solid",
+    "ink": 100,
+    "pattern": "diag",
+    "scale": 5,
+    "weight": 1,
+    "from": 100,
+    "to": 0,
+    "angle": 0
+   },
+   "padding": 0.4,
+   "radius": 0.8,
+   "symbol": false
+  }
+ ],
+ "assets": {},
+ "series": {
+  "start": 1,
+  "step": 1,
+  "count": 10,
+  "pad": 0,
+  "repeat": 1,
+  "collate": true,
+  "advance": true
+ },
+ "data": {
+  "source": {
+   "kind": "table",
+   "name": "Spices",
+   "path": null,
+   "sheet": null,
+   "header": true,
+   "link": "reread",
+   "read": null,
+   "modified": null
+  },
+  "columns": [
+   {
+    "name": "Name",
+    "type": "text"
+   },
+   {
+    "name": "Date",
+    "type": "date"
+   },
+   {
+    "name": "Quantity",
+    "type": "number"
+   },
+   {
+    "name": "Spicy",
+    "type": "bool"
+   },
+   {
+    "name": "Expires",
+    "type": "date"
+   }
+  ],
+  "rows": [
+   [
+    "Oregano",
+    "2026-10-11",
+    "2",
+    "no",
+    ""
+   ],
+   [
+    "Basil",
+    "2026-10-11",
+    "1",
+    "no",
+    ""
+   ],
+   [
+    "Sweet paprika",
+    "2026-12-18",
+    "3",
+    "yes",
+    "2027-03-18"
+   ],
+   [
+    "Turmeric",
+    "2026-11-04",
+    "1",
+    "no",
+    ""
+   ],
+   [
+    "Chili",
+    "2026-10-20",
+    "2",
+    "yes",
+    ""
+   ]
+  ],
+  "checked": [],
+  "formulas": [
+   {
+    "name": "Expiry",
+    "expr": "IF(ISBLANK([Expires]); ADDDAYS([Date]; 90); [Expires])",
+    "format": "short"
+   }
+  ],
+  "filter": [],
+  "sort": null,
+  "copies": "Quantity",
+  "current": 0,
+  "which": "all",
+  "range": {
+   "from": 1,
+   "to": 1
+  },
+  "search": ""
+ }
+}

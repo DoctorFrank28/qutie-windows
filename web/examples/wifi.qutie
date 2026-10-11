@@ -1,0 +1,202 @@
+{
+ "format": "qutie-label",
+ "version": 2,
+ "id": "1afa6806-0955-4975-b946-dc82ea5855af",
+ "name": "Wi-Fi with QR",
+ "label": {
+  "media": "gap",
+  "length": 40,
+  "auto": false,
+  "margin": 2,
+  "feed": 10
+ },
+ "objects": [
+  {
+   "id": "omv4ehdpeg",
+   "type": "qr",
+   "name": "QR Wi-Fi",
+   "x": 0.4,
+   "y": 0.4,
+   "w": 11.2,
+   "h": 11.2,
+   "rotation": 0,
+   "hidden": false,
+   "locked": false,
+   "group": null,
+   "dither": {
+    "mode": "auto",
+    "threshold": 128,
+    "cell": 6,
+    "angle": 45
+   },
+   "visible": {
+    "mode": "always",
+    "join": "and",
+    "rules": []
+   },
+   "empty": "hide",
+   "closeGap": false,
+   "kind": "qr",
+   "content": "WIFI:T:WPA;S:Casa;P:password;;",
+   "ecc": "m",
+   "quiet": 0,
+   "version": "auto",
+   "moduleDots": 0,
+   "invert": false,
+   "qrType": "wifi",
+   "qrData": {
+    "ssid": "Casa",
+    "password": "password",
+    "security": "WPA",
+    "hidden": false
+   }
+  },
+  {
+   "id": "omv4ehdpeh",
+   "type": "text",
+   "name": "Title",
+   "x": 13,
+   "y": 0.8,
+   "w": 26,
+   "h": 6,
+   "rotation": 0,
+   "hidden": false,
+   "locked": false,
+   "group": null,
+   "dither": {
+    "mode": "auto",
+    "threshold": 128,
+    "cell": 6,
+    "angle": 45
+   },
+   "visible": {
+    "mode": "always",
+    "join": "and",
+    "rules": []
+   },
+   "empty": "hide",
+   "closeGap": false,
+   "text": "Wi-Fi",
+   "font": "Segoe UI",
+   "size": 24,
+   "autoFit": true,
+   "bold": true,
+   "italic": false,
+   "underline": false,
+   "strike": false,
+   "align": "left",
+   "valign": "middle",
+   "spacing": 0,
+   "lineHeight": 1.05,
+   "transform": "none",
+   "wrap": false,
+   "fill": {
+    "type": "solid",
+    "ink": 100,
+    "pattern": "diag",
+    "scale": 5,
+    "weight": 1,
+    "from": 100,
+    "to": 0,
+    "angle": 0
+   },
+   "stroke": {
+    "width": 0,
+    "ink": 100,
+    "dash": "solid"
+   },
+   "background": {
+    "type": "none",
+    "ink": 100,
+    "pattern": "diag",
+    "scale": 5,
+    "weight": 1,
+    "from": 100,
+    "to": 0,
+    "angle": 0
+   },
+   "padding": 0,
+   "radius": 0,
+   "symbol": false
+  },
+  {
+   "id": "omv4ehdpei",
+   "type": "text",
+   "name": "Detail",
+   "x": 13,
+   "y": 7,
+   "w": 26,
+   "h": 4,
+   "rotation": 0,
+   "hidden": false,
+   "locked": false,
+   "group": null,
+   "dither": {
+    "mode": "auto",
+    "threshold": 128,
+    "cell": 6,
+    "angle": 45
+   },
+   "visible": {
+    "mode": "always",
+    "join": "and",
+    "rules": []
+   },
+   "empty": "hide",
+   "closeGap": false,
+   "text": "Casa · password",
+   "font": "Consolas",
+   "size": 24,
+   "autoFit": true,
+   "bold": false,
+   "italic": false,
+   "underline": false,
+   "strike": false,
+   "align": "left",
+   "valign": "middle",
+   "spacing": 0,
+   "lineHeight": 1.05,
+   "transform": "none",
+   "wrap": false,
+   "fill": {
+    "type": "solid",
+    "ink": 100,
+    "pattern": "diag",
+    "scale": 5,
+    "weight": 1,
+    "from": 100,
+    "to": 0,
+    "angle": 0
+   },
+   "stroke": {
+    "width": 0,
+    "ink": 100,
+    "dash": "solid"
+   },
+   "background": {
+    "type": "none",
+    "ink": 100,
+    "pattern": "diag",
+    "scale": 5,
+    "weight": 1,
+    "from": 100,
+    "to": 0,
+    "angle": 0
+   },
+   "padding": 0,
+   "radius": 0,
+   "symbol": false
+  }
+ ],
+ "assets": {},
+ "series": {
+  "start": 1,
+  "step": 1,
+  "count": 10,
+  "pad": 0,
+  "repeat": 1,
+  "collate": true,
+  "advance": true
+ },
+ "data": null
+}

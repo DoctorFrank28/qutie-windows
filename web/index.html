@@ -2,11 +2,383 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<meta http-equiv="refresh" content="0; url=serial-test.html">
-<title>Qutie</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<title>qutie.js Demo</title>
+<meta name="description" content="Print on the HPRT Qutie label maker from the browser with qutie.js: text, pictures and Qutie Studio labels with data.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --background: oklch(1 0 0); --foreground: oklch(0.145 0 0); --card: oklch(1 0 0);
+  --muted: oklch(0.97 0 0); --muted-foreground: oklch(0.556 0 0);
+  --primary: oklch(0.205 0 0); --primary-foreground: oklch(0.985 0 0); --accent: oklch(0.97 0 0);
+  --destructive: oklch(0.577 0.245 27.325); --ok: oklch(0.6 0.13 150);
+  --border: oklch(0.922 0 0); --input: oklch(0.922 0 0); --ring: oklch(0.708 0 0); --radius: 0.625rem;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --background: oklch(0.145 0 0); --foreground: oklch(0.985 0 0); --card: oklch(0.205 0 0);
+    --muted: oklch(0.269 0 0); --muted-foreground: oklch(0.708 0 0);
+    --primary: oklch(0.922 0 0); --primary-foreground: oklch(0.205 0 0); --accent: oklch(0.269 0 0);
+    --destructive: oklch(0.704 0.191 22.216); --ok: oklch(0.72 0.14 150);
+    --border: oklch(1 0 0 / 10%); --input: oklch(1 0 0 / 15%); --ring: oklch(0.556 0 0);
+  }
+}
+:root[data-theme="dark"] {
+  --background: oklch(0.145 0 0); --foreground: oklch(0.985 0 0); --card: oklch(0.205 0 0);
+  --muted: oklch(0.269 0 0); --muted-foreground: oklch(0.708 0 0);
+  --primary: oklch(0.922 0 0); --primary-foreground: oklch(0.205 0 0); --accent: oklch(0.269 0 0);
+  --destructive: oklch(0.704 0.191 22.216); --ok: oklch(0.72 0.14 150);
+  --border: oklch(1 0 0 / 10%); --input: oklch(1 0 0 / 15%); --ring: oklch(0.556 0 0);
+}
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body { margin: 0; background: var(--background); color: var(--foreground); font: 15px/1.5 "Geist", system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+main { max-width: 640px; margin: 0 auto; padding: 20px 16px calc(32px + env(safe-area-inset-bottom)); display: grid; gap: 16px; }
+h1 { font-size: 22px; font-weight: 600; margin: 0; letter-spacing: -0.01em; }
+h2 { font-size: 15px; font-weight: 600; margin: 0; }
+p { margin: 0; }
+a { color: inherit; }
+.muted { color: var(--muted-foreground); font-size: 13px; }
+.card { background: var(--card); border: 1px solid var(--border); border-radius: calc(var(--radius) + 4px); padding: 16px; display: grid; gap: 12px; min-width: 0; }
+.row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.between { justify-content: space-between; }
+.grow { flex: 1 1 auto; min-width: 0; }
+button, .file {
+  font: inherit; font-size: 14px; font-weight: 500; height: 40px; padding: 0 16px; border-radius: var(--radius);
+  border: 1px solid transparent; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  transition: background-color .15s, color .15s, border-color .15s, opacity .15s; touch-action: manipulation;
+}
+button:focus-visible, input:focus-visible, select:focus-visible, .file:focus-within { outline: 3px solid color-mix(in oklch, var(--ring) 50%, transparent); outline-offset: 1px; }
+button:disabled { opacity: .5; pointer-events: none; }
+.primary { background: var(--primary); color: var(--primary-foreground); }
+.primary:hover { background: color-mix(in oklch, var(--primary) 90%, transparent); }
+.outline, .file { background: var(--background); color: var(--foreground); border-color: var(--input); }
+.outline:hover, .file:hover { background: var(--accent); }
+.full { width: 100%; }
+input[type=text], input[type=number], select {
+  font: inherit; height: 40px; width: 100%; padding: 0 12px; border-radius: var(--radius);
+  border: 1px solid var(--input); background: transparent; color: var(--foreground); min-width: 0;
+}
+select { appearance: auto; }
+.file input { position: absolute; width: 1px; height: 1px; opacity: 0; }
+label.field { display: grid; gap: 4px; font-size: 13px; color: var(--muted-foreground); min-width: 0; }
+.fields { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 10px; }
+.seg { display: inline-flex; background: var(--muted); border-radius: var(--radius); padding: 3px; gap: 2px; flex-wrap: wrap; }
+.seg button { height: 32px; padding: 0 12px; font-size: 13px; background: transparent; color: var(--muted-foreground); border-radius: calc(var(--radius) - 3px); }
+.seg button[aria-checked="true"] { background: var(--background); color: var(--foreground); box-shadow: 0 1px 2px oklch(0 0 0 / 10%); }
+.badge { display: inline-flex; align-items: center; gap: 6px; height: 24px; padding: 0 10px; border-radius: 999px; font-size: 12px; font-weight: 500; border: 1px solid var(--border); white-space: nowrap; }
+.badge::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--muted-foreground); }
+.badge.ok::before { background: var(--ok); } .badge.bad::before { background: var(--destructive); }
+.previews { background: var(--muted); border-radius: var(--radius); padding: 12px; display: grid; gap: 10px; justify-items: center; max-height: 420px; overflow: auto; overscroll-behavior: contain; }
+.previews figure { margin: 0; display: grid; gap: 4px; justify-items: center; max-width: 100%; }
+.previews canvas { image-rendering: pixelated; background: #fff; border-radius: 3px; box-shadow: 0 1px 3px oklch(0 0 0 / 20%); height: 72px; width: auto; max-width: 100%; object-fit: contain; }
+.previews figcaption { font-size: 12px; color: var(--muted-foreground); font-variant-numeric: tabular-nums; }
+pre { font: 12px/1.55 "Geist Mono", ui-monospace, monospace; background: var(--muted); border-radius: var(--radius); padding: 12px; margin: 0; overflow: auto; white-space: pre; }
+.error { color: var(--destructive); font-size: 13px; }
+.hidden { display: none !important; }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
 </head>
 <body>
-<p><a href="serial-test.html">Qutie · Web Serial test</a> · <a href="https://github.com/DoctorFrank28/qutie-windows">Source</a></p>
+<main>
+  <header>
+    <h1>qutie.js</h1>
+    <p class="muted">Print on the HPRT Qutie label maker straight from the browser, with no app and no server: text, pictures and labels made with Qutie Studio, with their data. Chrome or Edge, on Android and on desktop. <a href="https://github.com/DoctorFrank28/qutie-windows">Source and docs</a> · <a href="serial-test.html">Connection test</a></p>
+  </header>
+
+  <section class="card" aria-labelledby="printer-title">
+    <div class="row between">
+      <h2 id="printer-title">Printer</h2>
+      <span class="badge" id="state" role="status">Not connected</span>
+    </div>
+    <div class="row">
+      <button class="primary grow" id="connect" type="button">Connect the Qutie…</button>
+      <button class="outline" id="disconnect" type="button" disabled>Disconnect</button>
+    </div>
+    <p class="muted" id="printer-line">Close HerePrint first: the Qutie accepts one connection at a time.</p>
+  </section>
+
+  <section class="card" aria-labelledby="label-title">
+    <h2 id="label-title">Label</h2>
+    <div class="seg" role="radiogroup" aria-label="What to print" id="sources">
+      <button type="button" role="radio" data-source="text" aria-checked="true">Text</button>
+      <button type="button" role="radio" data-source="example" aria-checked="false">Example</button>
+      <button type="button" role="radio" data-source="file" aria-checked="false">.qutie file</button>
+      <button type="button" role="radio" data-source="picture" aria-checked="false">Picture</button>
+    </div>
+    <div data-panel="text" class="row">
+      <input type="text" id="text" name="text" class="grow" value="Hello Qutie" autocomplete="off" spellcheck="false" aria-label="Text">
+    </div>
+    <div data-panel="example" class="hidden">
+      <select id="example" name="example" aria-label="Example label"></select>
+    </div>
+    <div data-panel="file" class="hidden">
+      <label class="file full"><input type="file" id="file" accept=".qutie,application/json"><span id="file-name">Choose a .qutie file from Qutie Studio…</span></label>
+    </div>
+    <div data-panel="picture" class="hidden">
+      <label class="file full"><input type="file" id="picture" accept="image/*"><span id="picture-name">Choose a picture…</span></label>
+    </div>
+    <div class="row between" id="length-row">
+      <span class="muted" id="length-label">Length</span>
+      <div class="seg" role="radiogroup" aria-labelledby="length-label" id="lengths">
+        <button type="button" role="radio" data-len="30" aria-checked="false">30 mm</button>
+        <button type="button" role="radio" data-len="40" aria-checked="true">40 mm</button>
+        <button type="button" role="radio" data-len="50" aria-checked="false">50 mm</button>
+        <button type="button" role="radio" data-len="auto" aria-checked="false">Auto</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="card hidden" aria-labelledby="data-title" id="data-card">
+    <div class="row between">
+      <h2 id="data-title">Data</h2>
+      <div class="seg hidden" role="radiogroup" aria-label="Which data" id="data-modes">
+        <button type="button" role="radio" data-mode="rows" aria-checked="true">Saved rows</button>
+        <button type="button" role="radio" data-mode="fields" aria-checked="false">One label</button>
+      </div>
+    </div>
+    <p class="muted" id="data-note"></p>
+    <div class="fields" id="fields"></div>
+    <div class="fields" id="series"></div>
+  </section>
+
+  <section class="card" aria-labelledby="preview-title">
+    <div class="row between">
+      <h2 id="preview-title">Preview</h2>
+      <label class="field" style="grid-auto-flow: column; align-items: center; gap: 8px;">Copies
+        <input type="number" id="copies" name="copies" value="1" min="1" max="99" inputmode="numeric" style="width: 72px;">
+      </label>
+    </div>
+    <div class="previews" id="previews" aria-live="polite"></div>
+    <p class="error" id="error" role="alert"></p>
+    <button class="primary full" id="print" type="button" disabled>Print</button>
+    <p class="muted" id="progress" aria-live="polite"></p>
+  </section>
+
+  <section class="card" aria-labelledby="code-title">
+    <div class="row between">
+      <h2 id="code-title">The same in code</h2>
+      <button class="outline" id="copy" type="button">Copy</button>
+    </div>
+    <pre id="code"></pre>
+  </section>
+</main>
+
+<script type="module">
+import Qutie from "./qutie.js";
+
+const $ = (id) => document.getElementById(id);
+const state = { source: "text", length: "40", doc: null, docName: "", data: "rows", values: {}, start: null, count: null, picture: null, printer: null };
+let examples = [];
+
+// ------------------------------------------------------------------ the printer
+function showPrinter(text, ok = false, bad = false) {
+  $("state").textContent = text;
+  $("state").className = `badge ${ok ? "ok" : bad ? "bad" : ""}`;
+  $("connect").disabled = ok;
+  $("disconnect").disabled = !ok;
+  $("print").disabled = !ok || !$("previews").childElementCount;
+}
+
+$("connect").addEventListener("click", async () => {
+  try {
+    showPrinter("Connecting…");
+    const printer = await Qutie.connect();
+    state.printer = printer;
+    printer.addEventListener("disconnect", () => { state.printer = null; showPrinter("Disconnected", false, true); });
+    showPrinter(`Connected · ${printer.transport === "bluetooth" ? "Bluetooth" : "serial port"}`, true);
+    const s = await printer.status();
+    $("printer-line").textContent = `${printer.name} · battery ${s.battery}% · ${s.paper === "continuous" ? "continuous tape" : "gap labels"} · density ${s.density}`;
+  } catch (e) {
+    showPrinter(e.name === "NotFoundError" ? "No printer chosen" : "Not connected", false, e.name !== "NotFoundError");
+    if (e.name !== "NotFoundError") $("printer-line").textContent = e.message;
+  }
+});
+$("disconnect").addEventListener("click", async () => { await state.printer?.disconnect(); state.printer = null; showPrinter("Not connected"); });
+
+// ------------------------------------------------------------------ what to print
+function radio(group, attr, onPick) {
+  $(group).addEventListener("click", (e) => {
+    const b = e.target.closest(`button[${attr}]`);
+    if (!b) return;
+    for (const x of $(group).querySelectorAll("button")) x.setAttribute("aria-checked", String(x === b));
+    onPick(b.getAttribute(attr));
+  });
+  $(group).addEventListener("keydown", (e) => {
+    if (!["ArrowLeft", "ArrowRight"].includes(e.key)) return;
+    const all = [...$(group).querySelectorAll("button")];
+    const i = all.findIndex((x) => x.getAttribute("aria-checked") === "true");
+    const next = all[(i + (e.key === "ArrowRight" ? 1 : all.length - 1)) % all.length];
+    next.focus(); next.click();
+  });
+}
+radio("sources", "data-source", (v) => {
+  state.source = v;
+  for (const p of document.querySelectorAll("[data-panel]")) p.classList.toggle("hidden", p.dataset.panel !== v);
+  $("length-row").classList.toggle("hidden", v === "example" || v === "file");
+  load();
+});
+radio("lengths", "data-len", (v) => { state.length = v; load(); });
+radio("data-modes", "data-mode", (v) => { state.data = v; showData(); refresh(); });
+
+$("text").addEventListener("input", debounce(load, 250));
+$("example").addEventListener("change", load);
+$("file").addEventListener("change", () => { $("file-name").textContent = $("file").files[0]?.name || "Choose a .qutie file…"; load(); });
+$("picture").addEventListener("change", () => { $("picture-name").textContent = $("picture").files[0]?.name || "Choose a picture…"; load(); });
+$("copies").addEventListener("input", debounce(refresh, 250));
+
+function debounce(fn, ms) { let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), ms); }; }
+
+/** The document for the current choice. */
+async function load() {
+  $("error").textContent = "";
+  try {
+    if (state.source === "text") { state.doc = Qutie.textLabel($("text").value || " ", { length: state.length }); state.docName = ""; }
+    else if (state.source === "example") {
+      const e = examples.find((x) => x.file === $("example").value) || examples[0];
+      state.doc = await (await fetch(`examples/${e.file}`)).json();
+      state.docName = `examples/${e.file}`;
+    } else if (state.source === "file") {
+      const f = $("file").files[0];
+      state.doc = f ? JSON.parse(await f.text()) : null;
+      state.docName = f?.name || "";
+    } else {
+      const f = $("picture").files[0];
+      state.doc = f ? await Qutie.imageLabel(f, { length: state.length }) : null;
+      state.picture = f || null;
+    }
+    state.values = {};
+    state.data = state.doc?.data?.rows?.length ? "rows" : "fields";
+    for (const b of $("data-modes").querySelectorAll("button")) b.setAttribute("aria-checked", String(b.dataset.mode === state.data));
+    await buildData();
+    await refresh();
+  } catch (e) {
+    $("error").textContent = e.message;
+  }
+}
+
+// ------------------------------------------------------------------ data
+const usesCounter = (doc) => /\{n([+-]\d+)?\}/.test(JSON.stringify(doc?.objects || []));
+
+async function buildData() {
+  const doc = state.doc;
+  const fields = doc && (state.source === "example" || state.source === "file") ? await Qutie.fields(doc) : [];
+  const counter = usesCounter(doc);
+  $("data-card").classList.toggle("hidden", !fields.length && !counter);
+  $("data-modes").classList.toggle("hidden", !doc?.data?.rows?.length);
+  $("fields").replaceChildren(...fields.map((name) => {
+    const label = document.createElement("label");
+    label.className = "field";
+    const input = document.createElement("input");
+    input.type = "text"; input.name = name; input.autocomplete = "off"; input.placeholder = name;
+    input.addEventListener("input", debounce(() => { state.values[name] = input.value; refresh(); }, 300));
+    label.append(name, input);
+    return label;
+  }));
+  $("series").replaceChildren(...(counter ? [["start", "Start number", doc.series?.start ?? 1], ["count", "How many", doc.series?.count ?? 10]] : []).map(([key, text, value]) => {
+    const label = document.createElement("label");
+    label.className = "field";
+    const input = document.createElement("input");
+    input.type = "number"; input.name = key; input.value = value; input.inputMode = "numeric";
+    state[key] = Number(value);
+    input.addEventListener("input", debounce(() => { state[key] = Number(input.value); refresh(); }, 300));
+    label.append(text, input);
+    return label;
+  }));
+  showData();
+}
+
+function showData() {
+  const rows = state.doc?.data?.rows?.length || 0;
+  const useRows = state.data === "rows" && rows;
+  $("fields").classList.toggle("hidden", Boolean(useRows));
+  $("data-note").textContent = useRows ? `One label for each of the ${rows} rows saved in the label (its formulas, copies and conditions apply).`
+    : $("fields").childElementCount ? "Fill in the fields: one label with these values." : "";
+}
+
+function options() {
+  const o = {};
+  const copies = Math.max(1, Math.min(99, Number($("copies").value) || 1));
+  if (copies > 1) o.copies = copies;
+  if ((state.data === "fields" || !state.doc?.data?.rows?.length) && Object.keys(state.values).length) o.fields = { ...state.values };
+  if (usesCounter(state.doc)) { o.start = state.start; o.count = state.count; }
+  return o;
+}
+
+// ------------------------------------------------------------------ preview, print, code
+async function refresh() {
+  $("error").textContent = "";
+  const previews = $("previews");
+  if (!state.doc) { previews.replaceChildren(); showCode(); return; }
+  try {
+    const labels = await Qutie.preview(state.doc, { ...options(), scale: 2 });
+    previews.replaceChildren(...labels.slice(0, 30).map(({ canvas, row, copy }, i) => {
+      const fig = document.createElement("figure");
+      const cap = document.createElement("figcaption");
+      cap.textContent = row !== null ? `Row ${row + 1}${copy > 1 ? ` · copy ${copy}` : ""}` : `Label ${i + 1}`;
+      canvas.setAttribute("role", "img");
+      canvas.setAttribute("aria-label", cap.textContent);
+      fig.append(canvas, cap);
+      return fig;
+    }));
+    if (labels.length > 30) previews.append(Object.assign(document.createElement("p"), { className: "muted", textContent: `… and ${labels.length - 30} more` }));
+    $("progress").textContent = `${labels.length} label${labels.length === 1 ? "" : "s"}`;
+  } catch (e) {
+    previews.replaceChildren();
+    $("error").textContent = e.message;
+  }
+  $("print").disabled = !state.printer || !previews.childElementCount;
+  showCode();
+}
+
+$("print").addEventListener("click", async () => {
+  $("print").disabled = true;
+  $("error").textContent = "";
+  try {
+    const started = performance.now();
+    const { printed } = await state.printer.print(state.doc, {
+      ...options(),
+      onProgress: ({ printed: n, total }) => { $("progress").textContent = `Printing ${n} of ${total}…`; },
+    });
+    $("progress").textContent = `Printed ${printed} label${printed === 1 ? "" : "s"} in ${((performance.now() - started) / 1000).toFixed(1)} s`;
+  } catch (e) {
+    $("error").textContent = e.message;
+  } finally {
+    $("print").disabled = !state.printer;
+  }
+});
+
+function showCode() {
+  const o = options();
+  const args = Object.keys(o).length ? `, ${JSON.stringify(o, null, 1).replace(/\n\s*/g, " ")}` : "";
+  let call;
+  if (state.source === "text") call = `await printer.printText(${JSON.stringify($("text").value)}, { length: ${JSON.stringify(state.length === "auto" ? "auto" : Number(state.length))} });`;
+  else if (state.source === "picture") call = `await printer.printImage(fileOrImage, { length: ${JSON.stringify(state.length === "auto" ? "auto" : Number(state.length))} });`;
+  else call = `await printer.print(${JSON.stringify(state.docName || "label.qutie")}${args});`;
+  $("code").textContent = `import Qutie from "https://doctorfrank28.github.io/qutie-windows/qutie.js";
+
+// after a click or a tap:
+const printer = await Qutie.connect();
+console.log(await printer.status()); // battery, paper…
+${call}`;
+}
+$("copy").addEventListener("click", async () => {
+  try { await navigator.clipboard.writeText($("code").textContent); $("copy").textContent = "Copied"; setTimeout(() => { $("copy").textContent = "Copy"; }, 1500); } catch { /* not allowed here */ }
+});
+
+// ------------------------------------------------------------------ start
+const support = Qutie.support();
+if (!support.secure || (!support.bluetooth && !support.serial)) {
+  $("connect").disabled = true;
+  $("printer-line").textContent = !support.secure ? "This page must be opened over HTTPS." : "This browser cannot reach the printer: use Chrome or Edge (Android, Windows, macOS, Linux). Previews still work.";
+}
+examples = await (await fetch("examples/index.json")).json();
+$("example").replaceChildren(...examples.map((e) => Object.assign(document.createElement("option"), { value: e.file, textContent: e.name })));
+document.fonts?.ready.then(refresh);
+load();
+</script>
 </body>
 </html>

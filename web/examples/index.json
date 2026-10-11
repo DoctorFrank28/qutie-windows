@@ -1,0 +1,38 @@
+[
+ {
+  "file": "freezer.qutie",
+  "name": "Freezer"
+ },
+ {
+  "file": "jar.qutie",
+  "name": "Spice jar"
+ },
+ {
+  "file": "boxes.qutie",
+  "name": "Boxes from a list"
+ },
+ {
+  "file": "inventory.qutie",
+  "name": "Numbered inventory"
+ },
+ {
+  "file": "wifi.qutie",
+  "name": "Wi-Fi with QR"
+ },
+ {
+  "file": "pantry.qutie",
+  "name": "Pantry"
+ },
+ {
+  "file": "name.qutie",
+  "name": "Name"
+ },
+ {
+  "file": "price.qutie",
+  "name": "Price tag"
+ },
+ {
+  "file": "warning.qutie",
+  "name": "Warning"
+ }
+]
