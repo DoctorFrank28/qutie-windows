@@ -192,6 +192,7 @@ const MODES = { safe: { chunk: 20, response: true }, fast: { chunk: 100, respons
 let port = null, writer = null, reader = null, rx = new Uint8Array(0), waiters = [];
 let transport = null; // { kind: "le" | "serial", write(bytes), close() }
 let mode = "safe";
+let flow = { count: 0, last: "" }; // FF03 notifications since the last summary
 let length = "40";
 
 // ------------------------------------------------------------------ log
@@ -239,8 +240,8 @@ function setConnected(on, text) {
 
 /** Bytes from the printer: replies go to the buffer that requests wait on. */
 function received(value, tag = "RX") {
+  if (tag === "FF03") { flow.count++; flow.last = hex(value); return; }
   log(`${tag} ${hex(value)}  ${ascii(value).slice(0, 48)}`, "rx");
-  if (tag !== "RX") return;
   const next = new Uint8Array(rx.length + value.length);
   next.set(rx); next.set(value, rx.length);
   rx = next;
@@ -353,7 +354,13 @@ async function disconnect() {
 
 async function send(bytes, label = "") {
   log(`TX ${label ? label + " " : ""}${hex(bytes)}`, "tx");
+  const started = performance.now();
   await transport.write(bytes);
+  if (transport?.kind === "le" && bytes.length > 64) {
+    const ms = Math.max(1, performance.now() - started);
+    log(`   ${bytes.length} bytes in ${Math.round(ms)} ms (${Math.round(bytes.length / ms * 1000)} B/s), FF03 ×${flow.count} (${flow.last})`);
+    flow.count = 0;
+  }
 }
 
 /** Bytes received after `from`, once `test` accepts them (or null after `ms`). */
@@ -494,12 +501,16 @@ async function print() {
     const parts = jobBytes(label);
     const total = parts.reduce((s, p) => s + p.length, 0);
     log(`print "${$("text").value}": ${label.canvas.width} × ${DOTS} dots, ${parts.length} writes, ${total} bytes`);
+    const blocks = parts.filter((p) => p.length === 12 && p[0] === GS && p[1] === 0x76).length;
     const from = rx.length, started = performance.now();
+    flow.count = 0;
     for (const p of parts) await send(p);
     log(`sent in ${Math.round(performance.now() - started)} ms, waiting for the printer…`);
-    const done = await waitFor(from, (b) => ascii(b).includes("dithering_finish"), 10000);
-    if (done) log(`printed: confirmation after ${Math.round(performance.now() - started)} ms`);
-    else log("no confirmation within 10 s (the label may still have printed)", "err");
+    // The Qutie confirms every raster block ("dithering_finish") as it prints it.
+    const finished = (b) => ascii(b).split("dithering_finish").length - 1;
+    const done = await waitFor(from, (b) => finished(b) >= blocks, 15000);
+    if (done) log(`printed: ${blocks} blocks confirmed after ${Math.round(performance.now() - started)} ms`);
+    else log(`only ${finished(rx.slice(from))} of ${blocks} blocks confirmed within 15 s`, "err");
   } catch (e) {
     log(`print: ${e.name}: ${e.message}`, "err");
   } finally {
