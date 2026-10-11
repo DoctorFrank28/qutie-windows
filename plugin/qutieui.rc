@@ -1,0 +1,37 @@
+#include <windows.h>
+#include "resource.h"
+
+// "Qutie" tab added to the Windows printing dialogs. The texts are set at run time
+// in the Windows UI language (see qutieui.cpp).
+IDD_QUTIE DIALOGEX 0, 0, 252, 120
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_CAPTION
+CAPTION "Qutie"
+FONT 9, "Segoe UI", 400, 0, 0x1
+BEGIN
+    LTEXT           "", IDC_TITLE, 10, 10, 232, 12
+    LTEXT           "", IDC_TEXT, 10, 26, 232, 40
+    PUSHBUTTON      "", IDC_OPEN, 10, 72, 140, 16
+END
+
+VS_VERSION_INFO VERSIONINFO
+ FILEVERSION 1,0,0,0
+ PRODUCTVERSION 1,0,0,0
+ FILEOS VOS_NT_WINDOWS32
+ FILETYPE VFT_DLL
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904b0"
+        BEGIN
+            VALUE "FileDescription", "HPRT Qutie printer driver UI plug-in"
+            VALUE "FileVersion", "1.0.0.0"
+            VALUE "ProductName", "Qutie driver"
+            VALUE "ProductVersion", "1.0.0.0"
+            VALUE "OriginalFilename", "QUTIEUI.DLL"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x409, 1200
+    END
+END
