@@ -514,7 +514,7 @@ async function print() {
   } catch (e) {
     log(`print: ${e.name}: ${e.message}`, "err");
   } finally {
-    $("print").disabled = !port;
+    $("print").disabled = !transport; // LE or serial: still connected, ready for the next label
   }
 }
 
