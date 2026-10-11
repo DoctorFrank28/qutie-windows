@@ -357,7 +357,7 @@ function fakeApi() {
     printer: () => later(300, new URLSearchParams(location.search).has("installed")
       ? { Name: "Qutie", DriverName: "HPRT Qutie", PortName: "COM5:" } : null),
     install: () => later(800, { ok: true }),
-    components: () => later(200, { studio: true, autostart: true, version: "1.1.0" }),
+    components: () => later(200, { studio: true, autostart: true, version: "1.2.0" }),
     set_studio: () => later(600, { ok: true }),
     set_autostart: (v) => later(100, v),
     open_studio: () => {},

@@ -1,6 +1,6 @@
 [project]
 name = "qutie"
-version = "1.1.0"
+version = "1.2.0"
 description = "Windows printer driver and tools for the HPRT Qutie Bluetooth label maker"
 readme = "README.md"
 license = "MIT"

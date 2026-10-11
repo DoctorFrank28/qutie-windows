@@ -219,7 +219,7 @@ try {
         New-Item -Path $key -Force | Out-Null
         $values = @{
             DisplayName     = 'Qutie printer'
-            DisplayVersion  = '1.1.0'
+            DisplayVersion  = '1.2.0'
             Publisher       = 'qutie-driver'
             DisplayIcon     = "$exe,0"
             InstallLocation = $folder

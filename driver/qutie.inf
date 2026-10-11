@@ -13,7 +13,7 @@ Provider=%Provider%
 ClassGUID={4D36E979-E325-11CE-BFC1-08002BE10318}
 Class=Printer
 CatalogFile=qutie.cat
-DriverVer=10/11/2026,1.1.0.0
+DriverVer=10/11/2026,1.2.0.0
 
 [Manufacturer]
 %Manufacturer%=Qutie,NTamd64,NTarm64
