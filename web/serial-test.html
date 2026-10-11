@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="color-scheme" content="light dark">
-<title>Qutie Serial Test</title>
+<title>Qutie Browser Test</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -100,15 +100,15 @@ dd { margin: 0; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
 <main>
   <header class="row between">
     <div class="grow">
-      <h1>Qutie · Web Serial test</h1>
-      <p class="muted">Connect the HPRT Qutie straight from the browser over Bluetooth (SPP), with no app and no server.</p>
+      <h1>Qutie · browser test</h1>
+      <p class="muted">Print on the HPRT Qutie straight from the browser, with no app and no server: Bluetooth LE (Android, Chrome on any system) or the Bluetooth serial port (desktop).</p>
     </div>
   </header>
 
   <section class="card" aria-labelledby="support-title">
     <h2 id="support-title">This browser</h2>
     <ul class="checks" id="checks"></ul>
-    <p class="muted">Before connecting: pair the Qutie in the phone's Bluetooth settings, close HerePrint (the printer accepts one connection at a time).</p>
+    <p class="muted">Before connecting: close HerePrint and anything else using the Qutie (it accepts one connection at a time).</p>
   </section>
 
   <section class="card" aria-labelledby="conn-title">
@@ -116,18 +116,21 @@ dd { margin: 0; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
       <h2 id="conn-title">Connection</h2>
       <span class="badge" id="state" role="status">Not connected</span>
     </div>
+    <button class="primary full" id="connect-le" type="button">Connect over Bluetooth LE…</button>
     <div class="row">
-      <button class="primary grow" id="connect" type="button">Choose the Qutie…</button>
+      <button class="outline grow" id="connect" type="button">Serial port…</button>
+      <button class="outline grow" id="connect-all" type="button">All serial ports…</button>
       <button class="outline" id="disconnect" type="button" disabled>Disconnect</button>
     </div>
-    <button class="outline full" id="connect-all" type="button">Show all ports (no filter)</button>
-    <p class="muted">Nothing in the list? Pair the Qutie in Android's Bluetooth settings, give Chrome the “Nearby devices” permission (Settings › Apps › Chrome › Permissions) and try “Show all ports”.</p>
-  </section>
-
-  <section class="card" aria-labelledby="ble-title">
-    <h2 id="ble-title">Bluetooth LE check</h2>
-    <p class="muted">Web Serial cannot see the Qutie on Android yet. Web Bluetooth (LE) works well there: if the Qutie also speaks LE, the page can print through it. This lists the LE devices nearby; pick the Qutie if it shows up.</p>
-    <button class="outline full" id="ble" type="button">Look for the Qutie over Bluetooth LE…</button>
+    <div class="row between">
+      <span class="muted" id="mode-label">LE sending</span>
+      <div class="seg" role="radiogroup" aria-labelledby="mode-label" id="modes">
+        <button type="button" role="radio" data-mode="safe" aria-checked="true">Safe</button>
+        <button type="button" role="radio" data-mode="fast" aria-checked="false">Fast</button>
+        <button type="button" role="radio" data-mode="max" aria-checked="false">Max</button>
+      </div>
+    </div>
+    <p class="muted">Safe: 20-byte packets, each acknowledged. Fast and Max: 100 or 180 bytes without waiting. Try Fast if Safe prints well but slowly.</p>
   </section>
 
   <section class="card" aria-labelledby="printer-title">
@@ -181,7 +184,14 @@ const DOTS = 96, DPMM = 203 / 25.4, EXTRA_MM = 10, FEED_MM = 14;
 const ESC = 0x1b, GS = 0x1d;
 const $ = (id) => document.getElementById(id);
 
+// Bluetooth LE: service FF00, commands written to FF02, replies notified on FF01; FF03 also
+// notifies (flow control, it seems) and is only logged.
+const LE = { service: 0xff00, write: 0xff02, reply: 0xff01, flow: 0xff03 };
+const MODES = { safe: { chunk: 20, response: true }, fast: { chunk: 100, response: false }, max: { chunk: 180, response: false } };
+
 let port = null, writer = null, reader = null, rx = new Uint8Array(0), waiters = [];
+let transport = null; // { kind: "le" | "serial", write(bytes), close() }
+let mode = "safe";
 let length = "40";
 
 // ------------------------------------------------------------------ log
@@ -205,25 +215,76 @@ const ascii = (bytes) => Array.from(bytes, (b) => (b >= 32 && b < 127 ? String.f
 function checks() {
   const ua = navigator.userAgent;
   const items = [
-    [window.isSecureContext, "Secure page (HTTPS)", "Web Serial needs HTTPS (or localhost)."],
-    ["serial" in navigator, "Web Serial API", "Use Chrome or Edge (Android: a recent Chrome). Not Safari, Firefox or in-app browsers."],
-    [/Android/.test(ua) || !/Mobile/.test(ua), /Android/.test(ua) ? "Android" : "Desktop", "On iPhone no browser has Web Serial."],
+    [window.isSecureContext, "Secure page (HTTPS)", "Bluetooth in the browser needs HTTPS (or localhost)."],
+    ["bluetooth" in navigator, "Web Bluetooth (LE)", "Use Chrome or Edge. Not Safari, Firefox, iPhone or in-app browsers."],
+    ["serial" in navigator, "Web Serial (serial port)", "Optional: only Chrome and Edge on desktop see the Qutie's serial port."],
   ];
   $("checks").replaceChildren(...items.map(([ok, label, hint]) => {
     const li = document.createElement("li");
     li.innerHTML = `<span class="mark ${ok ? "yes" : "no"}" aria-hidden="true">${ok ? "✓" : "✕"}</span><span>${label}${ok ? "" : ` — <span class="muted">${hint}</span>`}</span>`;
     return li;
   }));
-  return items.every(([ok]) => ok);
+  return items[0][0] && (items[1][0] || items[2][0]);
 }
 
 // ------------------------------------------------------------------ connection
 function setConnected(on, text) {
-  $("state").textContent = text || (on ? "Connected" : "Not connected");
+  $("state").textContent = text || (on ? `Connected · ${transport?.kind === "le" ? "Bluetooth LE" : "serial port"}` : "Not connected");
   $("state").className = `badge ${on ? "ok" : ""}`;
   for (const id of ["status", "info", "print", "feed", "disconnect"]) $(id).disabled = !on;
-  $("connect").disabled = on;
-  $("connect-all").disabled = on;
+  $("connect").disabled = on || !("serial" in navigator);
+  $("connect-all").disabled = on || !("serial" in navigator);
+  $("connect-le").disabled = on || !("bluetooth" in navigator);
+}
+
+/** Bytes from the printer: replies go to the buffer that requests wait on. */
+function received(value, tag = "RX") {
+  log(`${tag} ${hex(value)}  ${ascii(value).slice(0, 48)}`, "rx");
+  if (tag !== "RX") return;
+  const next = new Uint8Array(rx.length + value.length);
+  next.set(rx); next.set(value, rx.length);
+  rx = next;
+  waiters = waiters.filter((w) => !w());
+}
+
+async function connectLe() {
+  try {
+    log("requestDevice (Qutie over LE)");
+    const device = await navigator.bluetooth.requestDevice({
+      filters: [{ services: [LE.service] }, { namePrefix: "Qutie" }], optionalServices: [LE.service],
+    });
+    $("state").textContent = "Connecting…";
+    const started = performance.now();
+    const server = await device.gatt.connect();
+    const service = await server.getPrimaryService(LE.service);
+    const tx = await service.getCharacteristic(LE.write);
+    for (const [id, tag] of [[LE.reply, "RX"], [LE.flow, "FF03"]]) {
+      const ch = await service.getCharacteristic(id);
+      ch.addEventListener("characteristicvaluechanged", (e) => {
+        const v = e.target.value;
+        received(new Uint8Array(v.buffer.slice(v.byteOffset, v.byteOffset + v.byteLength)), tag);
+      });
+      await ch.startNotifications();
+    }
+    device.addEventListener("gattserverdisconnected", () => { log("the printer disconnected (LE)", "err"); transport = null; setConnected(false); });
+    transport = {
+      kind: "le",
+      async write(bytes) {
+        const { chunk, response } = MODES[mode];
+        for (let i = 0; i < bytes.length; i += chunk) {
+          const part = bytes.slice(i, i + chunk);
+          if (response) await tx.writeValueWithResponse(part); else await tx.writeValueWithoutResponse(part);
+        }
+      },
+      async close() { device.gatt.disconnect(); },
+    };
+    log(`LE connected to "${device.name}" in ${Math.round(performance.now() - started)} ms`);
+    setConnected(true);
+  } catch (e) {
+    log(`LE: ${e.name}: ${e.message}`, "err");
+    $("state").textContent = e.name === "NotFoundError" ? "No printer chosen" : "Failed";
+    $("state").className = "badge bad";
+  }
 }
 
 async function connect(event) {
@@ -249,6 +310,7 @@ async function open(chosen) {
   await chosen.open({ baudRate: 115200 });
   port = chosen;
   writer = port.writable.getWriter();
+  transport = { kind: "serial", write: (bytes) => writer.write(bytes), close: cleanup };
   log(`open in ${Math.round(performance.now() - started)} ms`);
   setConnected(true);
   readLoop();
@@ -262,13 +324,7 @@ async function readLoop() {
       for (;;) {
         const { value, done } = await reader.read();
         if (done) break;
-        if (value?.length) {
-          const next = new Uint8Array(rx.length + value.length);
-          next.set(rx); next.set(value, rx.length);
-          rx = next;
-          log(`RX ${hex(value)}  ${ascii(value).slice(0, 48)}`, "rx");
-          waiters = waiters.filter((w) => !w());
-        }
+        if (value?.length) received(value);
       }
     } catch (e) {
       log(`read: ${e.name}: ${e.message}`, "err");
@@ -285,17 +341,19 @@ async function cleanup() {
   try { writer?.releaseLock(); } catch {}
   try { await port?.close(); } catch {}
   port = writer = reader = null;
+  transport = null;
   setConnected(false);
 }
 
 async function disconnect() {
   log("disconnect");
-  await cleanup();
+  if (transport?.kind === "le") { await transport.close(); transport = null; setConnected(false); }
+  else await cleanup();
 }
 
 async function send(bytes, label = "") {
   log(`TX ${label ? label + " " : ""}${hex(bytes)}`, "tx");
-  await writer.write(bytes);
+  await transport.write(bytes);
 }
 
 /** Bytes received after `from`, once `test` accepts them (or null after `ms`). */
@@ -321,41 +379,6 @@ async function request(cmd, size, label) {
   if (!reply) { log(`${label}: no reply within 3 s (${rx.length - from} bytes)`, "err"); return null; }
   log(`${label}: reply in ${Math.round(performance.now() - started)} ms`);
   return reply.slice(0, size);
-}
-
-// ------------------------------------------------------------------ Bluetooth LE
-// Services label printers commonly use as a serial line over LE.
-const LE_SERIAL = [
-  0xff00, 0xffe0, 0xfff0, 0x18f0, 0xae30, 0xfee7,
-  "49535343-fe7d-4ae5-8fa9-9fafd205e455",  // Microchip/ISSC transparent UART
-  "6e400001-b5a3-f393-e0a9-e50e24dcca9e",  // Nordic UART
-  "e7810a71-73ae-499d-8c15-faa9aef0c3f2",
-  "0000fee7-0000-1000-8000-00805f9b34fb",
-];
-
-async function lookLe() {
-  if (!navigator.bluetooth) { log("Web Bluetooth is not available in this browser", "err"); return; }
-  try {
-    log("requestDevice (all LE devices)");
-    const device = await navigator.bluetooth.requestDevice({ acceptAllDevices: true, optionalServices: LE_SERIAL });
-    log(`LE device: "${device.name || "(no name)"}" id ${device.id}`);
-    const server = await device.gatt.connect();
-    log("LE connected");
-    const services = await server.getPrimaryServices();
-    if (!services.length) log("none of the usual serial services: this device has others", "err");
-    for (const svc of services) {
-      log(`service ${svc.uuid}`);
-      for (const ch of await svc.getCharacteristics()) {
-        const p = ch.properties;
-        const flags = ["read", "write", "writeWithoutResponse", "notify", "indicate"].filter((k) => p[k]).join(" ");
-        log(`  characteristic ${ch.uuid}  [${flags}]`);
-      }
-    }
-    server.disconnect();
-    log("LE disconnected");
-  } catch (e) {
-    log(`LE: ${e.name}: ${e.message}`, "err");
-  }
 }
 
 // ------------------------------------------------------------------ printer
@@ -491,7 +514,14 @@ async function feed() {
 // ------------------------------------------------------------------ wiring
 $("connect").addEventListener("click", connect);
 $("connect-all").addEventListener("click", connect);
-$("ble").addEventListener("click", lookLe);
+$("connect-le").addEventListener("click", connectLe);
+$("modes").addEventListener("click", (e) => {
+  const b = e.target.closest("button[data-mode]");
+  if (!b) return;
+  mode = b.dataset.mode;
+  for (const x of $("modes").querySelectorAll("button")) x.setAttribute("aria-checked", String(x === b));
+  log(`LE sending: ${mode} (${MODES[mode].chunk} bytes, ${MODES[mode].response ? "acknowledged" : "not acknowledged"})`);
+});
 $("disconnect").addEventListener("click", disconnect);
 $("status").addEventListener("click", readStatus);
 $("info").addEventListener("click", readInfo);
@@ -519,11 +549,11 @@ $("copy").addEventListener("click", async () => {
 
 const supported = checks();
 setConnected(false);
-if (!supported) { $("connect").disabled = $("connect-all").disabled = true; log("this browser cannot use Web Serial: see the checks above", "err"); }
+if (!supported) { log("this browser cannot reach the printer: see the checks above", "err"); }
 else {
   const chrome = (navigator.userAgentData?.brands || []).map((b) => `${b.brand} ${b.version}`).join(", ") || (navigator.userAgent.match(/Chrome\/[\d.]+/) || ["?"])[0];
   log(`ready · ${chrome} · ${navigator.userAgentData?.platform || navigator.platform}`);
-  navigator.serial.getPorts().then((ports) => { if (ports.length) log(`${ports.length} port(s) already allowed on this page`); });
+  navigator.serial?.getPorts().then((ports) => { if (ports.length) log(`${ports.length} serial port(s) already allowed on this page`); });
 }
 document.fonts?.ready.then(drawLabel);
 drawLabel();
