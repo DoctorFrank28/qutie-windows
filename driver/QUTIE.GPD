@@ -1,0 +1,470 @@
+*%
+*% HPRT Qutie - Unidrv minidriver (GPD only, no code)
+*%
+*% Unidrv renders the page at 203 dpi and sends one 96-dot row (12 bytes) per
+*% block, in the Qutie raster format:
+*%   1D 76 30 30 | width in bytes (2) | rows (2) | LZO length (4) | LZO1X data
+*% The LZO1X stream holds only literals: one byte (n + 17), the n bytes of the
+*% row and the end-of-stream marker 11 00 00.
+*% At the end of each page: GS f with the label length (gap labels only), then
+*% the "tape feed" (ESC ESC 1 n, 10 mm by default) so the last printed part
+*% clears the tear bar.
+*%
+*% Settings shown by Windows (Printing preferences > Advanced, and Printer
+*% properties > Device settings): paper size, orientation, media type, tape
+*% feed, print density and auto power off. Names of the standard features are
+*% translated by Windows; the custom ones are in English.
+*%
+*GPDSpecVersion: "1.0"
+*GPDFileVersion: "1.0"
+*Include: "StdNames.gpd"
+*ModelName: "HPRT Qutie"
+*MasterUnits: PAIR(203, 203)
+*PrinterType: PAGE
+*MaxCopies: 1
+
+*%******************************************************************************
+*%                               Orientation
+*%******************************************************************************
+*% Landscape turns the page 90 degrees clockwise (CC270): the start of the text is
+*% printed first, so on the tape the labels read in the order they were printed.
+*Feature: Orientation
+{
+    *rcNameID: =ORIENTATION_DISPLAY
+    *DefaultOption: LANDSCAPE_CC270
+    *Option: PORTRAIT
+    {
+        *rcNameID: =PORTRAIT_DISPLAY
+    }
+    *Option: LANDSCAPE_CC270
+    {
+        *rcNameID: =LANDSCAPE_DISPLAY
+    }
+}
+
+*%******************************************************************************
+*%                               Paper source
+*%******************************************************************************
+*Feature: InputBin
+{
+    *rcNameID: =PAPER_SOURCE_DISPLAY
+    *DefaultOption: AUTO
+    *Option: AUTO
+    {
+        *rcNameID: =AUTO_DISPLAY
+    }
+}
+
+*%******************************************************************************
+*%                               Resolution
+*%******************************************************************************
+*Feature: Resolution
+{
+    *rcNameID: =RESOLUTION_DISPLAY
+    *DefaultOption: Option1
+    *Option: Option1
+    {
+        *Name: "203 x 203 dpi"
+        *DPI: PAIR(203, 203)
+        *TextDPI: PAIR(203, 203)
+        *SpotDiameter: 100
+        *Command: CmdSendBlockData
+        {
+            *Cmd : "<1D763030>" %l{RasterDataWidthInBytes} "<0100>" %l{NumOfDataBytes + 4} "<0000>" %c{NumOfDataBytes + 17}
+        }
+        *Command: CmdEndBlockData
+        {
+            *Cmd : "<110000>"
+        }
+    }
+}
+
+*%******************************************************************************
+*%                               Halftoning
+*%******************************************************************************
+*Feature: Halftone
+{
+    *rcNameID: =HALFTONING_DISPLAY
+    *DefaultOption: HT_PATSIZE_AUTO
+    *Option: HT_PATSIZE_AUTO
+    {
+        *rcNameID: =HT_AUTO_SELECT_DISPLAY
+    }
+    *Option: HT_PATSIZE_SUPERCELL_M
+    {
+        *rcNameID: =HT_SUPERCELL_DISPLAY
+    }
+    *Option: HT_PATSIZE_6x6_M
+    {
+        *rcNameID: =HT_DITHER6X6_DISPLAY
+    }
+    *Option: HT_PATSIZE_8x8_M
+    {
+        *rcNameID: =HT_DITHER8X8_DISPLAY
+    }
+}
+
+*%******************************************************************************
+*%                               Label sizes
+*%   Width: 96 dots (12 mm, the whole head). Lengths in dots at 203 dpi.
+*%   Names are language neutral on purpose.
+*%******************************************************************************
+*Feature: PaperSize
+{
+    *rcNameID: =PAPER_SIZE_DISPLAY
+    *% Default: "Fit to tape", so apps with their usual margins (Excel, browsers)
+    *% print without any page setup.
+    *DefaultOption: FIT_A5
+    *Option: Q12X30
+    {
+        *Name: "12 x 30 mm"
+        *PageDimensions: PAIR(96, 240)
+        *PrintableArea: PAIR(96, 240)
+        *PrintableOrigin: PAIR(0, 0)
+    }
+    *Option: Q12X40
+    {
+        *Name: "12 x 40 mm"
+        *PageDimensions: PAIR(96, 320)
+        *PrintableArea: PAIR(96, 320)
+        *PrintableOrigin: PAIR(0, 0)
+    }
+    *Option: Q12X50
+    {
+        *Name: "12 x 50 mm"
+        *PageDimensions: PAIR(96, 400)
+        *PrintableArea: PAIR(96, 400)
+        *PrintableOrigin: PAIR(0, 0)
+    }
+    *Option: Q12X70
+    {
+        *Name: "12 x 70 mm"
+        *PageDimensions: PAIR(96, 559)
+        *PrintableArea: PAIR(96, 559)
+        *PrintableOrigin: PAIR(0, 0)
+    }
+    *% For continuous tape: the Qutie app trims the blank tape after the content.
+    *Option: Q12X100
+    {
+        *Name: "12 x 100 mm"
+        *PageDimensions: PAIR(96, 799)
+        *PrintableArea: PAIR(96, 799)
+        *PrintableOrigin: PAIR(0, 0)
+    }
+    *% "Fit to tape": an ordinary A5 page, so Excel and browsers keep their usual
+    *% margins. The Qutie app crops the content and scales it to the 12 mm tape.
+    *% Rows are 148 bytes wide here: printing this size without the app is not
+    *% possible (the printer takes 12-byte rows).
+    *Option: FIT_A5
+    {
+        *Name: "Fit to tape (A5)"
+        *PageDimensions: PAIR(1183, 1677)
+        *PrintableArea: PAIR(1183, 1677)
+        *PrintableOrigin: PAIR(0, 0)
+    }
+    *Option: CUSTOMSIZE
+    {
+        *rcNameID: =USER_DEFINED_SIZE_DISPLAY
+        *MinSize: PAIR(96, 80)
+        *MaxSize: PAIR(96, 2400)
+        *MaxPrintableWidth: 96
+        *MinLeftMargin: 0
+        *CenterPrintable?: FALSE
+    }
+}
+
+*%******************************************************************************
+*%                               Media type
+*%   Gap labels end with GS f (label length in dots); continuous tape does not.
+*%******************************************************************************
+*Feature: MediaType
+{
+    *rcNameID: =MEDIA_TYPE_DISPLAY
+    *% The Qutie reports paper type 0 with its continuous roll: make it the default.
+    *DefaultOption: CONTINUOUS
+    *Option: GAP
+    {
+        *Name: "Gap labels"
+        *Command: CmdSelect
+        {
+            *Order: PAGE_FINISH.2
+            *Cmd : "<1D66>" %l{PhysPaperLength}
+        }
+    }
+    *Option: CONTINUOUS
+    {
+        *Name: "Continuous tape"
+        *Command: CmdSelect
+        {
+            *Order: PAGE_FINISH.2
+            *Cmd : ""
+        }
+    }
+}
+
+*%******************************************************************************
+*%                               Tape feed after each label
+*%   ESC ESC 1 nL nH, n in dots (8 dots per mm).
+*%******************************************************************************
+*Feature: TapeFeed
+{
+    *Name: "Tape feed after label"
+    *DefaultOption: F10
+    *Option: F0
+    {
+        *Name: "0 mm"
+        *Command: CmdSelect
+        {
+            *Order: PAGE_FINISH.3
+            *Cmd : ""
+        }
+    }
+    *Option: F5
+    {
+        *Name: "5 mm"
+        *Command: CmdSelect
+        {
+            *Order: PAGE_FINISH.3
+            *Cmd : "<1B1B012800>"
+        }
+    }
+    *Option: F10
+    {
+        *Name: "10 mm"
+        *Command: CmdSelect
+        {
+            *Order: PAGE_FINISH.3
+            *Cmd : "<1B1B015000>"
+        }
+    }
+    *Option: F15
+    {
+        *Name: "15 mm"
+        *Command: CmdSelect
+        {
+            *Order: PAGE_FINISH.3
+            *Cmd : "<1B1B017800>"
+        }
+    }
+    *Option: F20
+    {
+        *Name: "20 mm"
+        *Command: CmdSelect
+        {
+            *Order: PAGE_FINISH.3
+            *Cmd : "<1B1B01A000>"
+        }
+    }
+    *Option: F25
+    {
+        *Name: "25 mm"
+        *Command: CmdSelect
+        {
+            *Order: PAGE_FINISH.3
+            *Cmd : "<1B1B01C800>"
+        }
+    }
+}
+
+*%******************************************************************************
+*%                               Print density
+*%   GS "setc" n. "Printer setting" sends nothing and keeps what the printer has.
+*%******************************************************************************
+*Feature: PrintDensity
+{
+    *Name: "Print density"
+    *DefaultOption: KEEP
+    *Option: KEEP
+    {
+        *Name: "Printer setting"
+        *Command: CmdSelect
+        {
+            *Order: DOC_SETUP.2
+            *Cmd : ""
+        }
+    }
+    *Option: D50
+    {
+        *Name: "50 (light)"
+        *Command: CmdSelect
+        {
+            *Order: DOC_SETUP.2
+            *Cmd : "<1D7365746332>"
+        }
+    }
+    *Option: D60
+    {
+        *Name: "60"
+        *Command: CmdSelect
+        {
+            *Order: DOC_SETUP.2
+            *Cmd : "<1D736574633C>"
+        }
+    }
+    *Option: D70
+    {
+        *Name: "70"
+        *Command: CmdSelect
+        {
+            *Order: DOC_SETUP.2
+            *Cmd : "<1D7365746346>"
+        }
+    }
+    *Option: D75
+    {
+        *Name: "75 (app default)"
+        *Command: CmdSelect
+        {
+            *Order: DOC_SETUP.2
+            *Cmd : "<1D736574634B>"
+        }
+    }
+    *Option: D80
+    {
+        *Name: "80"
+        *Command: CmdSelect
+        {
+            *Order: DOC_SETUP.2
+            *Cmd : "<1D7365746350>"
+        }
+    }
+    *Option: D90
+    {
+        *Name: "90"
+        *Command: CmdSelect
+        {
+            *Order: DOC_SETUP.2
+            *Cmd : "<1D736574635A>"
+        }
+    }
+    *Option: D95
+    {
+        *Name: "95 (factory)"
+        *Command: CmdSelect
+        {
+            *Order: DOC_SETUP.2
+            *Cmd : "<1D736574635F>"
+        }
+    }
+    *Option: D100
+    {
+        *Name: "100 (dark)"
+        *Command: CmdSelect
+        {
+            *Order: DOC_SETUP.2
+            *Cmd : "<1D7365746364>"
+        }
+    }
+}
+
+*%******************************************************************************
+*%                               Auto power off (printer property)
+*%   GS "sett" nL nH, n in seconds. "Printer setting" sends nothing.
+*%******************************************************************************
+*Feature: AutoPowerOff
+{
+    *Name: "Auto power off"
+    *FeatureType: PRINTER_PROPERTY
+    *DefaultOption: KEEP
+    *Option: KEEP
+    {
+        *Name: "Printer setting"
+        *Command: CmdSelect
+        {
+            *Order: JOB_SETUP.1
+            *Cmd : ""
+        }
+    }
+    *Option: M10
+    {
+        *Name: "10 minutes"
+        *Command: CmdSelect
+        {
+            *Order: JOB_SETUP.1
+            *Cmd : "<1D736574745802>"
+        }
+    }
+    *Option: M15
+    {
+        *Name: "15 minutes"
+        *Command: CmdSelect
+        {
+            *Order: JOB_SETUP.1
+            *Cmd : "<1D736574748403>"
+        }
+    }
+    *Option: M30
+    {
+        *Name: "30 minutes"
+        *Command: CmdSelect
+        {
+            *Order: JOB_SETUP.1
+            *Cmd : "<1D736574740807>"
+        }
+    }
+    *Option: M60
+    {
+        *Name: "1 hour"
+        *Command: CmdSelect
+        {
+            *Order: JOB_SETUP.1
+            *Cmd : "<1D73657474100E>"
+        }
+    }
+    *Option: M180
+    {
+        *Name: "3 hours"
+        *Command: CmdSelect
+        {
+            *Order: JOB_SETUP.1
+            *Cmd : "<1D73657474302A>"
+        }
+    }
+    *Option: M240
+    {
+        *Name: "4 hours"
+        *Command: CmdSelect
+        {
+            *Order: JOB_SETUP.1
+            *Cmd : "<1D736574744038>"
+        }
+    }
+}
+
+*%******************************************************************************
+*%                               Raster
+*%******************************************************************************
+*OutputDataFormat: H_BYTE
+*OptimizeLeftBound?: FALSE
+*RasterSendAllData?: TRUE
+*SendMultipleRows?: FALSE
+*CursorXAfterSendBlockData: AT_GRXDATA_ORIGIN
+*CursorYAfterSendBlockData: AUTO_INCREMENT
+
+*%******************************************************************************
+*%                               Commands
+*%******************************************************************************
+*Command: CmdStartDoc
+{
+    *Order: DOC_SETUP.1
+    *Cmd : "<1B6101>"
+}
+*Command: CmdStartPage
+{
+    *Order: PAGE_SETUP.1
+    *Cmd : ""
+}
+*% End of page: MediaType (PAGE_FINISH.2) and TapeFeed (PAGE_FINISH.3) send the bytes.
+*Command: CmdEndPage
+{
+    *Order: PAGE_FINISH.1
+    *Cmd : ""
+}
+*Command: CmdEndJob
+{
+    *Order: JOB_FINISH.1
+    *Cmd : ""
+}
+*Command: CmdCR { *Cmd : "" }
+*Command: CmdLF { *Cmd : "" }
+*Command: CmdFF { *Cmd : "" }

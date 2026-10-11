@@ -1,0 +1,64 @@
+;
+; qutie.inf - Printer driver for the HPRT Qutie label maker (Unidrv minidriver)
+; Same layout as Microsoft's package-aware inbox Unidrv drivers (prnge001.inf).
+;
+; On x64 the driver also carries QUTIEUI.DLL, a UI plug-in (declared in QUTIE.INI)
+; that opens the Qutie app's panel from the Windows printing dialogs. On ARM64 it
+; is the plain GPD driver.
+;
+
+[Version]
+Signature="$Windows NT$"
+Provider=%Provider%
+ClassGUID={4D36E979-E325-11CE-BFC1-08002BE10318}
+Class=Printer
+CatalogFile=qutie.cat
+DriverVer=10/11/2026,1.1.0.0
+
+[Manufacturer]
+%Manufacturer%=Qutie,NTamd64,NTarm64
+
+[Qutie.NTamd64]
+"HPRT Qutie" = QUTIE.GPD,QutieLabelPrinter,HPRT_Qutie
+
+[Qutie.NTarm64]
+"HPRT Qutie" = QUTIE_BASIC,QutieLabelPrinter,HPRT_Qutie
+
+[QUTIE.GPD]
+CopyFiles=@QUTIE.GPD,@QUTIE.INI,@QUTIEUI.DLL
+DataFile=QUTIE.GPD
+CoreDriverSections="{D20EA372-DD35-4950-9ED8-A6335AFE79F0},UNIDRV.OEM,UNIDRV_DATA"
+
+[QUTIE_BASIC]
+CopyFiles=@QUTIE.GPD
+DataFile=QUTIE.GPD
+CoreDriverSections="{D20EA372-DD35-4950-9ED8-A6335AFE79F0},UNIDRV.OEM,UNIDRV_DATA"
+
+[DestinationDirs]
+DefaultDestDir=66000
+
+[SourceDisksFiles]
+QUTIE.GPD = 1
+QUTIE.INI = 1
+
+[SourceDisksFiles.amd64]
+QUTIEUI.DLL = 1
+
+[SourceDisksNames.amd64]
+1 = %Disk%,,,""
+
+[SourceDisksNames.arm64]
+1 = %Disk%,,,""
+
+[PrinterPackageInstallation.amd64]
+PackageAware=TRUE
+CoreDriverDependencies={D20EA372-DD35-4950-9ED8-A6335AFE79F0}
+
+[PrinterPackageInstallation.arm64]
+PackageAware=TRUE
+CoreDriverDependencies={D20EA372-DD35-4950-9ED8-A6335AFE79F0}
+
+[Strings]
+Provider="qutie-driver"
+Manufacturer="HPRT"
+Disk="HPRT Qutie driver"
