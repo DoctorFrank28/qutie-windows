@@ -124,6 +124,12 @@ dd { margin: 0; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
     <p class="muted">Nothing in the list? Pair the Qutie in Android's Bluetooth settings, give Chrome the “Nearby devices” permission (Settings › Apps › Chrome › Permissions) and try “Show all ports”.</p>
   </section>
 
+  <section class="card" aria-labelledby="ble-title">
+    <h2 id="ble-title">Bluetooth LE check</h2>
+    <p class="muted">Web Serial cannot see the Qutie on Android yet. Web Bluetooth (LE) works well there: if the Qutie also speaks LE, the page can print through it. This lists the LE devices nearby; pick the Qutie if it shows up.</p>
+    <button class="outline full" id="ble" type="button">Look for the Qutie over Bluetooth LE…</button>
+  </section>
+
   <section class="card" aria-labelledby="printer-title">
     <div class="row between">
       <h2 id="printer-title">Printer</h2>
@@ -317,6 +323,41 @@ async function request(cmd, size, label) {
   return reply.slice(0, size);
 }
 
+// ------------------------------------------------------------------ Bluetooth LE
+// Services label printers commonly use as a serial line over LE.
+const LE_SERIAL = [
+  0xff00, 0xffe0, 0xfff0, 0x18f0, 0xae30, 0xfee7,
+  "49535343-fe7d-4ae5-8fa9-9fafd205e455",  // Microchip/ISSC transparent UART
+  "6e400001-b5a3-f393-e0a9-e50e24dcca9e",  // Nordic UART
+  "e7810a71-73ae-499d-8c15-faa9aef0c3f2",
+  "0000fee7-0000-1000-8000-00805f9b34fb",
+];
+
+async function lookLe() {
+  if (!navigator.bluetooth) { log("Web Bluetooth is not available in this browser", "err"); return; }
+  try {
+    log("requestDevice (all LE devices)");
+    const device = await navigator.bluetooth.requestDevice({ acceptAllDevices: true, optionalServices: LE_SERIAL });
+    log(`LE device: "${device.name || "(no name)"}" id ${device.id}`);
+    const server = await device.gatt.connect();
+    log("LE connected");
+    const services = await server.getPrimaryServices();
+    if (!services.length) log("none of the usual serial services: this device has others", "err");
+    for (const svc of services) {
+      log(`service ${svc.uuid}`);
+      for (const ch of await svc.getCharacteristics()) {
+        const p = ch.properties;
+        const flags = ["read", "write", "writeWithoutResponse", "notify", "indicate"].filter((k) => p[k]).join(" ");
+        log(`  characteristic ${ch.uuid}  [${flags}]`);
+      }
+    }
+    server.disconnect();
+    log("LE disconnected");
+  } catch (e) {
+    log(`LE: ${e.name}: ${e.message}`, "err");
+  }
+}
+
 // ------------------------------------------------------------------ printer
 function setFacts(pairs) {
   $("facts").replaceChildren(...pairs.flatMap(([k, v]) => {
@@ -450,6 +491,7 @@ async function feed() {
 // ------------------------------------------------------------------ wiring
 $("connect").addEventListener("click", connect);
 $("connect-all").addEventListener("click", connect);
+$("ble").addEventListener("click", lookLe);
 $("disconnect").addEventListener("click", disconnect);
 $("status").addEventListener("click", readStatus);
 $("info").addEventListener("click", readInfo);
