@@ -23,7 +23,7 @@ STUDIO_STRINGS.es = {
   menuFile: "Archivo", menuEdit: "Edición", menuInsert: "Insertar", menuArrange: "Organizar", menuView: "Ver", menuPrinter: "Impresora", menuHelp: "Ayuda",
   cmdNew: "Nueva etiqueta", cmdNewFromTemplate: "Nueva desde plantilla…", cmdOpen: "Abrir…", openRecent: "Abrir recientes", cmdSave: "Guardar",
   cmdSaveAs: "Guardar como…", cmdSaveTemplate: "Guardar como plantilla…", cmdLinkData: "Conectar datos…", cmdExportPng: "Exportar PNG…",
-  cmdExportPdf: "Exportar PDF de la serie…", cmdPrint: "Imprimir…", cmdPrintNow: "Imprimir ahora", cmdHome: "Volver al inicio",
+  cmdExportPdf: "Exportar PDF de la serie…", cmdPrint: "Imprimir…", cmdPrintNow: "Imprimir ahora", cmdHome: "Volver al inicio", cmdBackToLabel: "Volver a la etiqueta", currentLabel: "Etiqueta abierta", unsavedShort: "cambios sin guardar",
   cmdQuit: "Cerrar el Studio", clearRecent: "Vaciar la lista",
   cmdUndo: "Deshacer", cmdUndoWhat: (w) => `Deshacer «${w}»`, cmdRedo: "Rehacer", cmdCut: "Cortar", cmdCopy: "Copiar", cmdPaste: "Pegar",
   cmdPasteText: "Pegar solo el texto", cmdCopyStyle: "Copiar estilo", cmdPasteStyle: "Pegar estilo", cmdDuplicate: "Duplicar",

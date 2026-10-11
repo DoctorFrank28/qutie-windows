@@ -616,6 +616,15 @@ table.cap tr.cur td { font-weight: 600; }
 .hnav:hover { color: var(--foreground); background: var(--accent); }
 .hnav.on { background: var(--raised); color: var(--foreground); box-shadow: 0 1px 2px oklch(0 0 0 / 6%), 0 0 0 1px var(--border); }
 .hnav small { margin-left: auto; font-size: 12px; font-weight: 400; }
+.hcurrent { display: flex; flex-direction: column; align-items: stretch; gap: 8px; margin-bottom: 12px; padding: 10px; border: 1px solid var(--border); border-radius: 10px; background: var(--raised); color: var(--foreground); font: inherit; text-align: left; cursor: default; box-shadow: 0 1px 2px oklch(0 0 0 / 6%); transition: border-color .15s; }
+.hcurrent:hover { border-color: var(--ring); }
+.hcur-k { display: flex; align-items: center; gap: 4px; font-size: 12px; color: var(--muted-foreground); }
+canvas.hcur-thumb { align-self: center; max-width: 100%; max-height: 52px; width: auto; height: auto; image-rendering: pixelated; background: #fff; border-radius: 3px; box-shadow: 0 1px 3px oklch(0 0 0 / 18%); }
+.hcur-n, .back-label { display: flex; align-items: center; gap: 6px; min-width: 0; }
+.hcur-n { font-size: 13px; font-weight: 500; }
+.hcur-n .nm, .back-label .nm { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+.hcur-n .dot, .back-label .dot { color: var(--muted-foreground); }
+.back-label { max-width: 240px; margin-left: 4px; }
 .hpage { padding: 28px 36px; display: flex; flex-direction: column; gap: 20px; overflow: auto; min-width: 0; outline: none; }
 .hpage.dragging { box-shadow: inset 0 0 0 2px var(--select); background: color-mix(in oklch, var(--select) 4%, var(--background)); }
 .hhead { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; flex-wrap: wrap; }

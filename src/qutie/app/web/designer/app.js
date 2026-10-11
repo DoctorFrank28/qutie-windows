@@ -415,6 +415,9 @@ const Studio = {
     };
     append(tb, this.ui.undo, this.ui.redo, h("span.divider"), this.ui.viewSeg, this.ui.zoomOut, this.ui.zoomValue, this.ui.zoomIn,
       h("span.divider"), this.ui.settings, this.ui.print);
+    // On the Home pages, the way back to the label still open (where the editor shows its name).
+    this.ui.back = h("button.btn.outline.sm.back-label.home-only", { type: "button", onclick: () => run("backToLabel") });
+    $("#menubar").after(this.ui.back);
     const home = $("#tb-home");
     this.ui.homePrinter = h("button.chip.printer-chip", { type: "button", onclick: () => this.show("home", "printer") });
     append(home, this.ui.homePrinter, button(T.newLabel, { variant: "primary", size: "sm", icon: "plus", onClick: () => this.newBlank() }));
@@ -427,6 +430,13 @@ const Studio = {
     this.ui.undo.title = CMD.undo.label();
     this.ui.viewSeg.set(S.view.mode);
     this.ui.zoomValue.textContent = fmtPercent(S.view.zoom * 100);
+    const back = this.ui.back;
+    back.hidden = !S.doc;
+    if (S.doc) {
+      clear(back).append(ico("chevronLeft", 14), h("span.nm", S.doc.name), modified ? h("span.dot", { "aria-hidden": "true" }, "•") : null);
+      back.setAttribute("aria-label", `${T.cmdBackToLabel}: ${S.doc.name}${modified ? ` (${T.unsavedShort})` : ""}`);
+      back.title = `${T.cmdBackToLabel} (Esc)`;
+    }
     this.renderPrinterChips();
     DataUI.renderNavigator($("#recnav"));
   },

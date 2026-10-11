@@ -24,7 +24,7 @@ STUDIO_STRINGS.pt = {
   menuFile: "Ficheiro", menuEdit: "Editar", menuInsert: "Inserir", menuArrange: "Organizar", menuView: "Ver", menuPrinter: "Impressora", menuHelp: "Ajuda",
   cmdNew: "Nova etiqueta", cmdNewFromTemplate: "Nova a partir de um modelo…", cmdOpen: "Abrir…", openRecent: "Abrir recente", cmdSave: "Guardar",
   cmdSaveAs: "Guardar como…", cmdSaveTemplate: "Guardar como modelo…", cmdLinkData: "Ligar dados…", cmdExportPng: "Exportar PNG…",
-  cmdExportPdf: "Exportar PDF da série…", cmdPrint: "Imprimir…", cmdPrintNow: "Imprimir agora", cmdHome: "Voltar ao início",
+  cmdExportPdf: "Exportar PDF da série…", cmdPrint: "Imprimir…", cmdPrintNow: "Imprimir agora", cmdHome: "Voltar ao início", cmdBackToLabel: "Voltar à etiqueta", currentLabel: "Etiqueta aberta", unsavedShort: "alterações não guardadas",
   cmdQuit: "Fechar o Studio", clearRecent: "Limpar a lista",
   cmdUndo: "Anular", cmdUndoWhat: (w) => `Anular “${w}”`, cmdRedo: "Refazer", cmdCut: "Cortar", cmdCopy: "Copiar", cmdPaste: "Colar",
   cmdPasteText: "Colar só o texto", cmdCopyStyle: "Copiar estilo", cmdPasteStyle: "Colar estilo", cmdDuplicate: "Duplicar",

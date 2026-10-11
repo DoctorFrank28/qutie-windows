@@ -45,6 +45,8 @@ command("exportPdf", { label: () => T.cmdExportPdf, when: inEditor, run: () => D
 command("print", { label: () => T.cmdPrint, icon: "printer", keys: "Ctrl+P", when: inEditor, run: () => Dialogs.print() });
 command("printNow", { label: () => T.cmdPrintNow, keys: "Ctrl+Shift+P", when: inEditor, run: () => Studio.printNow() });
 command("home", { label: () => T.cmdHome, icon: "home", when: () => Studio.view === "editor", run: () => Studio.show("home") });
+// The label stays open while the Home pages are shown: Esc (or this command) goes back to it.
+command("backToLabel", { label: () => T.cmdBackToLabel, icon: "chevronLeft", keys: "Esc", when: () => Studio.view === "home" && !!S.doc, run: () => Studio.show("editor") });
 command("quit", { label: () => T.cmdQuit, keys: "Alt+F4", run: () => Studio.quit() });
 
 // ------------------------------------------------------------------ edit
@@ -161,7 +163,7 @@ const MENUS = {
     "-", mi("save"), mi("saveAs"), mi("saveTemplate"),
     "-", mi("linkData"), mi("exportPng"), mi("exportPdf"),
     "-", mi("print"), mi("printNow"),
-    "-", mi("home"), mi("quit"),
+    "-", Studio.view === "home" ? mi("backToLabel") : mi("home"), mi("quit"),
   ],
   edit: () => [
     mi("undo"), mi("redo"), "-", mi("cut"), mi("copy"), mi("paste"), mi("pasteText"), mi("duplicate"), mi("delete"),
@@ -390,6 +392,7 @@ document.addEventListener("keydown", (e) => {
     return;
   }
   if (key === "Esc") {
+    if (Studio.view === "home") { if (run("backToLabel")) e.preventDefault(); return; } // open overlays took Esc already
     if (S.pendingSymbol) { S.pendingSymbol = null; Studio.status(); invalidate(); return; }
     if (S.tool !== "select") { setTool("select"); return; }
   }

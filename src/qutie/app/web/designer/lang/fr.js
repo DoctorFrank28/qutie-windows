@@ -23,7 +23,7 @@ STUDIO_STRINGS.fr = {
   menuFile: "Fichier", menuEdit: "Édition", menuInsert: "Insertion", menuArrange: "Organiser", menuView: "Affichage", menuPrinter: "Imprimante", menuHelp: "Aide",
   cmdNew: "Nouvelle étiquette", cmdNewFromTemplate: "Nouvelle à partir d'un modèle…", cmdOpen: "Ouvrir…", openRecent: "Ouvrir un fichier récent", cmdSave: "Enregistrer",
   cmdSaveAs: "Enregistrer sous…", cmdSaveTemplate: "Enregistrer comme modèle…", cmdLinkData: "Connecter des données…", cmdExportPng: "Exporter en PNG…",
-  cmdExportPdf: "Exporter la série en PDF…", cmdPrint: "Imprimer…", cmdPrintNow: "Imprimer maintenant", cmdHome: "Retour à l'accueil",
+  cmdExportPdf: "Exporter la série en PDF…", cmdPrint: "Imprimer…", cmdPrintNow: "Imprimer maintenant", cmdHome: "Retour à l'accueil", cmdBackToLabel: "Revenir à l'étiquette", currentLabel: "Étiquette ouverte", unsavedShort: "modifications non enregistrées",
   cmdQuit: "Fermer le Studio", clearRecent: "Effacer la liste",
   cmdUndo: "Annuler", cmdUndoWhat: (w) => `Annuler « ${w} »`, cmdRedo: "Rétablir", cmdCut: "Couper", cmdCopy: "Copier", cmdPaste: "Coller",
   cmdPasteText: "Coller le texte seul", cmdCopyStyle: "Copier le style", cmdPasteStyle: "Coller le style", cmdDuplicate: "Dupliquer",

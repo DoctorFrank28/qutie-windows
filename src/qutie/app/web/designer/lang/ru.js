@@ -23,7 +23,7 @@ STUDIO_STRINGS.ru = {
   menuFile: "Файл", menuEdit: "Правка", menuInsert: "Вставка", menuArrange: "Упорядочить", menuView: "Вид", menuPrinter: "Принтер", menuHelp: "Справка",
   cmdNew: "Новая этикетка", cmdNewFromTemplate: "Создать из шаблона…", cmdOpen: "Открыть…", openRecent: "Последние файлы", cmdSave: "Сохранить",
   cmdSaveAs: "Сохранить как…", cmdSaveTemplate: "Сохранить как шаблон…", cmdLinkData: "Подключить данные…", cmdExportPng: "Экспорт в PNG…",
-  cmdExportPdf: "Экспорт серии в PDF…", cmdPrint: "Печать…", cmdPrintNow: "Печатать сейчас", cmdHome: "На главную",
+  cmdExportPdf: "Экспорт серии в PDF…", cmdPrint: "Печать…", cmdPrintNow: "Печатать сейчас", cmdHome: "На главную", cmdBackToLabel: "Вернуться к этикетке", currentLabel: "Открытая этикетка", unsavedShort: "несохранённые изменения",
   cmdQuit: "Закрыть Studio", clearRecent: "Очистить список",
   cmdUndo: "Отменить", cmdUndoWhat: (w) => `Отменить «${w}»`, cmdRedo: "Повторить", cmdCut: "Вырезать", cmdCopy: "Копировать", cmdPaste: "Вставить",
   cmdPasteText: "Вставить только текст", cmdCopyStyle: "Копировать стиль", cmdPasteStyle: "Вставить стиль", cmdDuplicate: "Дублировать",

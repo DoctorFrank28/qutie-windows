@@ -23,7 +23,7 @@ STUDIO_STRINGS.zh = {
   menuFile: "文件", menuEdit: "编辑", menuInsert: "插入", menuArrange: "排列", menuView: "视图", menuPrinter: "打印机", menuHelp: "帮助",
   cmdNew: "新建标签", cmdNewFromTemplate: "从模板新建…", cmdOpen: "打开…", openRecent: "最近打开", cmdSave: "保存",
   cmdSaveAs: "另存为…", cmdSaveTemplate: "另存为模板…", cmdLinkData: "连接数据…", cmdExportPng: "导出 PNG…",
-  cmdExportPdf: "导出整个系列的 PDF…", cmdPrint: "打印…", cmdPrintNow: "立即打印", cmdHome: "返回主页",
+  cmdExportPdf: "导出整个系列的 PDF…", cmdPrint: "打印…", cmdPrintNow: "立即打印", cmdHome: "返回主页", cmdBackToLabel: "返回标签", currentLabel: "已打开的标签", unsavedShort: "未保存的更改",
   cmdQuit: "关闭 Studio", clearRecent: "清除列表",
   cmdUndo: "撤销", cmdUndoWhat: (w) => `撤销“${w}”`, cmdRedo: "重做", cmdCut: "剪切", cmdCopy: "复制", cmdPaste: "粘贴",
   cmdPasteText: "仅粘贴文本", cmdCopyStyle: "复制样式", cmdPasteStyle: "粘贴样式", cmdDuplicate: "创建副本",

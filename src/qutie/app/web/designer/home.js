@@ -22,6 +22,14 @@ const Home = {
 
   renderNav() {
     clear(this.nav);
+    if (S.doc) {
+      // The label still open in the editor: one click (or Esc) goes back to it.
+      this.nav.append(h("button.hcurrent", { type: "button", onclick: () => run("backToLabel"), title: `${T.cmdBackToLabel} (Esc)`,
+        "aria-label": `${T.cmdBackToLabel}: ${S.doc.name}${modified ? ` (${T.unsavedShort})` : ""}` },
+        h("span.hcur-k", ico("chevronLeft", 13), T.currentLabel),
+        thumbCanvas(S.doc, "hcur-thumb"),
+        h("span.hcur-n", h("span.nm", S.doc.name), modified ? h("span.dot", { "aria-hidden": "true" }, "•") : null)));
+    }
     for (const item of NAV) {
       if (item === "-") { this.nav.append(h("span.spacer")); continue; }
       const [key, iconName] = item;
