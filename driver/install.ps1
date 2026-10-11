@@ -31,6 +31,10 @@
     The Qutie app ("Qutie Setup.exe") to copy to Program Files as Qutie.exe and
     register in Installed apps (passed by the setup wizard).
 
+.PARAMETER Studio
+    1 (default): also install Qutie Studio (Start menu "Qutie Studio", .qutie files).
+    0: only the driver (Start menu "Qutie" opens the printer settings). See components.ps1.
+
 .PARAMETER SpoolFile
     Print to this file instead of the COM port: the Qutie app picks each job up,
     shows the preview and sends it to the printer (passed by the setup wizard).
@@ -44,7 +48,8 @@ param(
     [switch]$Quiet,
     [string]$Log,
     [string]$Executable,
-    [string]$SpoolFile
+    [string]$SpoolFile,
+    [int]$Studio = 1
 )
 
 $ErrorActionPreference = 'Stop'
@@ -214,7 +219,7 @@ try {
         New-Item -Path $key -Force | Out-Null
         $values = @{
             DisplayName     = 'Qutie printer'
-            DisplayVersion  = '1.0.0'
+            DisplayVersion  = '1.1.0'
             Publisher       = 'qutie-driver'
             DisplayIcon     = "$exe,0"
             InstallLocation = $folder
@@ -224,14 +229,8 @@ try {
         foreach ($v in $values.GetEnumerator()) { New-ItemProperty -Path $key -Name $v.Key -Value $v.Value -Force | Out-Null }
         New-ItemProperty -Path $key -Name NoModify -Value 1 -PropertyType DWord -Force | Out-Null
         New-ItemProperty -Path $key -Name NoRepair -Value 1 -PropertyType DWord -Force | Out-Null
-        # Start menu entry: opens the status and settings screen.
-        $shortcut = (New-Object -ComObject WScript.Shell).CreateShortcut(
-            (Join-Path $env:ProgramData 'Microsoft\Windows\Start Menu\Programs\Qutie.lnk'))
-        $shortcut.TargetPath = $exe
-        $shortcut.Arguments = '--app'
-        $shortcut.IconLocation = "$exe,0"
-        $shortcut.Description = 'Qutie label printer: status, settings and print preview'
-        $shortcut.Save()
+        # Start menu entry and .qutie files: Qutie Studio, or the printer settings only.
+        & (Join-Path $PSScriptRoot 'components.ps1') -Studio $Studio -Executable $exe -Nested
         Write-Host "  $exe"
     }
 
@@ -243,7 +242,7 @@ try {
     Write-Host "`nDone: the '$Name' printer is ready. Pick the '12 x 40 mm' paper size (or another one) when you print." -ForegroundColor Green
 }
 catch {
-    Write-Host "`nError: $($_.Exception.Message)" -ForegroundColor Red
+    Write-Host "`nError: $($_.Exception.Message) (install.ps1, line $($_.InvocationInfo.ScriptLineNumber))" -ForegroundColor Red
     $result = 1
 }
 finally {

@@ -76,8 +76,13 @@ try {
     Step 'Removing from Installed apps'
     $key = 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\Qutie'
     if (Test-Path $key) { Remove-Item $key -Recurse -Force }
-    $shortcut = Join-Path $env:ProgramData 'Microsoft\Windows\Start Menu\Programs\Qutie.lnk'
-    if (Test-Path $shortcut) { Remove-Item $shortcut -Force }
+    foreach ($link in 'Qutie.lnk', 'Qutie Studio.lnk') {
+        $shortcut = Join-Path $env:ProgramData "Microsoft\Windows\Start Menu\Programs\$link"
+        if (Test-Path $shortcut) { Remove-Item $shortcut -Force }
+    }
+    foreach ($k in 'HKLM:\SOFTWARE\Classes\.qutie', 'HKLM:\SOFTWARE\Classes\Qutie.Label') {
+        if (Test-Path $k) { Remove-Item $k -Recurse -Force }
+    }
     $folder = Join-Path $env:ProgramFiles 'Qutie'
     if (Test-Path $folder) {
         # The executable may still be running: the folder goes as soon as it closes.
@@ -87,7 +92,7 @@ try {
     Write-Host "`nQutie uninstalled." -ForegroundColor Green
 }
 catch {
-    Write-Host "`nError: $($_.Exception.Message)" -ForegroundColor Red
+    Write-Host "`nError: $($_.Exception.Message) (uninstall.ps1, line $($_.InvocationInfo.ScriptLineNumber))" -ForegroundColor Red
     $result = 1
 }
 finally {

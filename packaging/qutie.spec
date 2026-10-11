@@ -1,11 +1,11 @@
-# PyInstaller: one executable for the whole app (tray, preview, settings, setup wizard).
+# PyInstaller: one executable for the whole app (tray, preview, settings, Qutie Studio, setup wizard).
 # Build:  uv run pyinstaller packaging/qutie.spec --noconfirm
 # The release ships it twice: "Qutie Setup.exe" (opens the setup wizard, see
 # qutie.app.main) and, once installed, "C:\Program Files\Qutie\Qutie.exe".
 import shutil
 from pathlib import Path
 
-from PyInstaller.utils.hooks import collect_submodules
+from PyInstaller.utils.hooks import collect_dynamic_libs, collect_submodules
 
 ROOT = Path(SPECPATH).parent
 
@@ -20,8 +20,10 @@ a = Analysis(
         (str(ROOT / "driver" / "amd64" / "QUTIEUI.DLL"), "driver/amd64"),
         (str(ROOT / "driver" / "install.ps1"), "driver"),
         (str(ROOT / "driver" / "uninstall.ps1"), "driver"),
+        (str(ROOT / "driver" / "components.ps1"), "driver"),
     ],
-    hiddenimports=collect_submodules("winrt") + ["pystray._win32"],
+    binaries=collect_dynamic_libs("zxingcpp"),
+    hiddenimports=collect_submodules("winrt") + ["pystray._win32", "zxingcpp", "openpyxl"],
     excludes=["tkinter", "pytest"],
 )
 pyz = PYZ(a.pure)

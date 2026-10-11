@@ -7,7 +7,7 @@ from pathlib import Path
 
 import webview
 
-from .. import pairing, winsys
+from .. import __version__, pairing, winsys
 from ..transport import QUTIE_NAMES
 
 WEB = Path(__file__).with_name("web")
@@ -62,11 +62,11 @@ class Api:
     def printer(self) -> dict | None:
         return winsys.installed_printer()
 
-    def install(self, port: str) -> dict:
+    def install(self, port: str, studio: bool = True) -> dict:
         from .agent import request
 
         request("quit")  # the running app holds the old printer open and would block the update
-        ok, log = winsys.install_driver(port)
+        ok, log = winsys.install_driver(port, studio=studio)
         if ok:
             # The Qutie app receives the jobs of the Windows printer: start it now and at sign-in.
             winsys.set_autostart(True)
@@ -87,6 +87,26 @@ class Api:
             except Exception as e:  # noqa: BLE001
                 log += f"\n\nBluetooth pairing not removed: {e}"
         return {"ok": bool(ok), "cancelled": ok is None, "detail": _last_error(log), "log": log}
+
+    def components(self) -> dict:
+        """What is installed besides the driver: Qutie Studio, start with Windows."""
+        return {"studio": winsys.studio_enabled(), "autostart": winsys.autostart_enabled(), "version": __version__}
+
+    def set_studio(self, enabled: bool) -> dict:
+        from .agent import request
+
+        ok, log = winsys.set_studio(bool(enabled))
+        if ok:
+            request("quit")  # the app reads the choice when it starts: restart it
+            winsys.launch_self("--background")
+        return {"ok": bool(ok), "cancelled": ok is None, "detail": _last_error(log), "log": log}
+
+    def set_autostart(self, enabled: bool) -> bool:
+        winsys.set_autostart(bool(enabled))
+        return winsys.autostart_enabled()
+
+    def open_studio(self) -> None:
+        winsys.launch_self("--studio")
 
     def test_windows(self) -> dict:
         try:

@@ -26,15 +26,22 @@ def _failure(e: Exception, connected: bool) -> dict:
     return {"ok": False, "detail": str(e), "reason": "no_reply" if connected else "unreachable"}
 
 
-def read() -> dict:
-    """Model, firmware, battery and settings, read over Bluetooth."""
-    printer = _printer()
-    try:
-        with printer:
-            info, status = printer.info(), printer.status()
-            mac = printer.mac
-    except (PrinterError, OSError, ValueError) as e:
-        return _failure(e, connected=printer.channel is not None)
+def read(attempts: int = 2) -> dict:
+    """Model, firmware, battery and settings, read over Bluetooth.
+
+    Right after a print the printer can refuse a new link for a moment: try again once.
+    """
+    for attempt in range(attempts):
+        printer = _printer()
+        try:
+            with printer:
+                info, status = printer.info(), printer.status()
+                mac = printer.mac
+            break
+        except (PrinterError, OSError, ValueError) as e:
+            if attempt == attempts - 1:
+                return _failure(e, connected=printer.channel is not None)
+            time.sleep(1.5)
     return {
         "ok": True,
         "mac": mac,

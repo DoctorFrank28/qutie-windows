@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <title>Qutie Studio</title>
+  <link rel="icon" href="icon.svg">
+  <link rel="stylesheet" href="designer/designer.css">
+</head>
+<body class="studio" data-view="home">
+  <header class="topbar">
+    <div class="brand"><span class="logo" aria-hidden="true"><span></span></span><span translate="no">Qutie Studio</span></div>
+    <nav class="menubar" id="menubar"></nav>
+    <span class="divider editor-only" aria-hidden="true"></span>
+    <label class="docname editor-only">
+      <span class="sr-only" id="doc-name-label"></span>
+      <input id="doc-name" name="doc-name" type="text" spellcheck="false" autocomplete="off" aria-labelledby="doc-name-label">
+    </label>
+    <span class="saved editor-only" id="saved" aria-live="polite"></span>
+    <span class="spacer"></span>
+    <div class="recnav editor-only" id="recnav" hidden></div>
+    <div class="tb editor-only" id="tb-edit"></div>
+    <div class="tb home-only" id="tb-home"></div>
+  </header>
+
+  <div class="hcols" id="home">
+    <nav class="hside" id="home-nav"></nav>
+    <main class="hpage" id="home-page" tabindex="-1"></main>
+  </div>
+
+  <div class="workspace" id="editor">
+    <nav class="rail" id="rail" role="toolbar" aria-orientation="vertical"></nav>
+    <main class="stage-wrap" id="stage-wrap">
+      <canvas id="stage" tabindex="0"></canvas>
+      <div class="banners" id="banners"></div>
+      <div class="floatbar" id="floatbar" role="toolbar" hidden></div>
+      <div class="empty-label" id="empty-label" hidden></div>
+      <div class="hint" id="hint"></div>
+      <div class="dropzone" id="dropzone" hidden></div>
+      <section class="datatable" id="datatable" hidden></section>
+    </main>
+    <aside class="insp" id="inspector"></aside>
+  </div>
+
+  <footer class="statusbar" id="statusbar"></footer>
+
+  <div id="overlays"></div>
+  <div id="toasts" aria-live="polite"></div>
+
+  <script src="designer/strings.js"></script>
+  <script src="designer/lang/es.js"></script>
+  <script src="designer/lang/fr.js"></script>
+  <script src="designer/lang/de.js"></script>
+  <script src="designer/lang/pt.js"></script>
+  <script src="designer/lang/ru.js"></script>
+  <script src="designer/lang/zh.js"></script>
+  <script src="designer/lang/ja.js"></script>
+  <script src="designer/lang.js"></script>
+  <script src="designer/api.js"></script>
+  <script src="designer/icons.js"></script>
+  <script src="designer/model.js"></script>
+  <script src="designer/data.js"></script>
+  <script src="designer/render.js"></script>
+  <script src="designer/editor.js"></script>
+  <script src="designer/ui.js"></script>
+  <script src="designer/commands.js"></script>
+  <script src="designer/inspector.js"></script>
+  <script src="designer/datapanel.js"></script>
+  <script src="designer/codes.js"></script>
+  <script src="designer/dialogs.js"></script>
+  <script src="designer/home.js"></script>
+  <script src="designer/app.js"></script>
+</body>
+</html>

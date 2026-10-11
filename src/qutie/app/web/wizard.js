@@ -1,14 +1,14 @@
 "use strict";
 /* global T */
 
-const STEPS = ["prepare", "search", "connect", "printer", "done"];
+const STEPS = ["prepare", "components", "search", "connect", "printer", "done"];
 const $ = (sel) => document.querySelector(sel);
 const content = $("#content");
 const btnNext = $("#next");
 const btnBack = $("#back");
 const btnSecondary = $("#secondary");
 
-const state = { step: null, mode: "install", devices: [], chosen: null, port: null, busy: false };
+const state = { step: null, mode: "install", devices: [], chosen: null, port: null, busy: false, studio: true };
 // What the footer buttons do in the current view.
 let actions = {};
 
@@ -83,29 +83,76 @@ const VIEWS = {
     go(state.installed ? "installed" : "prepare");
   },
 
-  installed() {
+  async installed() {
     const p = state.installed;
     const port = esc(String(p.PortName || "").replace(/:$/, ""));
+    const comps = await api("components").catch(() => ({ studio: true, autostart: true }));
+    if (state.step !== "installed") return;
+    const want = { studio: comps.studio, autostart: comps.autostart };
+    const item = (id, title, desc, checked, disabled, status) => `
+      <label class="choice">
+        <input type="checkbox" class="check" id="${id}" ${checked ? "checked" : ""} ${disabled ? "disabled" : ""}>
+        <span class="texts"><span class="name">${title}</span><span class="hint">${desc}</span></span>
+        <span class="badge" id="${id}-state">${status}</span>
+      </label>`;
     content.innerHTML = `<h2>${T.installedTitle}</h2>
-      <p class="description">${T.installedDesc(esc(p.Name), port)}</p>
-      ${list([row("ok", T.installedPrinter, p.Name), row("ok", T.installedDriver, p.DriverName), row("ok", T.installedPort, port)])}
-      <p class="description flat">${T.installedHint}</p>
+      <p class="description">${esc(T.installedOn(port, comps.version))}</p>
+      <h3 class="subtitle">${T.compHeading}</h3>
+      <div class="choices">
+        ${item("c-driver", T.compDriverItem, T.compDriverItemDesc, true, true, T.stInstalled)}
+        ${item("c-studio", "Qutie Studio", T.compStudioItemDesc, comps.studio, false, comps.studio ? T.stInstalled : T.stOff)}
+        ${item("c-autostart", T.compAutostart, T.compAutostartDesc, comps.autostart, false, comps.autostart ? T.stOn : T.stOff)}
+      </div>
       <div class="actions">
-        <button class="outline" type="button" id="open-settings">${T.settings}</button>
-        <button class="outline" type="button" id="reinstall">${T.reinstall}</button>
-        <button class="outline danger" type="button" id="remove">${T.uninstall}</button>
+        <button class="outline" type="button" id="open-settings">${comps.studio ? T.openStudio : T.settings}</button>
+        <button class="outline" type="button" id="reinstall">${T.reinstallDriver}</button>
+        <button class="outline" type="button" id="repair">${T.pairAgainBtn}</button>
+        <button class="outline danger" type="button" id="remove">${T.uninstallAll}</button>
       </div>`;
-    $("#open-settings").addEventListener("click", () => api("open_app"));
+    const apply = { label: T.apply, run: () => applyComponents(comps, want) };
+    const refresh = () => {
+      $("#c-studio-state").textContent = want.studio === comps.studio ? (comps.studio ? T.stInstalled : T.stOff) : want.studio ? T.stToAdd : T.stToRemove;
+      $("#c-autostart-state").textContent = want.autostart ? T.stOn : T.stOff;
+      const changed = want.studio !== comps.studio;
+      footer({
+        next: changed ? { ...apply, label: want.studio ? T.addStudio : T.removeStudio } : close,
+        secondary: changed ? { label: T.cancel, run: () => go("installed") } : { label: T.testPage, run: () => testPrint("test_windows") },
+      });
+    };
+    $("#c-studio").addEventListener("change", (e) => { want.studio = e.target.checked; refresh(); });
+    $("#c-autostart").addEventListener("change", async (e) => {
+      want.autostart = e.target.checked;
+      comps.autostart = await api("set_autostart", want.autostart);
+      refresh();
+    });
+    $("#open-settings").addEventListener("click", () => api(comps.studio ? "open_studio" : "open_app"));
     $("#reinstall").addEventListener("click", () => go("prepare"));
+    $("#repair").addEventListener("click", () => go("search"));
     $("#remove").addEventListener("click", () => go("uninstall"));
-    footer({ next: close, secondary: { label: T.testPage, run: () => testPrint("test_windows") } });
+    refresh();
+  },
+
+  components() {
+    const choice = (value, title, desc) => `
+      <label class="choice">
+        <input type="radio" name="components" value="${value}" ${String(state.studio) === value ? "checked" : ""}>
+        <span class="texts"><span class="name">${title}</span><span class="hint">${desc}</span></span>
+      </label>`;
+    content.innerHTML = `<h2>${T.compTitle}</h2><p class="description">${T.compSubtitle}</p>
+      <div class="choices" role="radiogroup">
+        ${choice("true", T.compStudio, T.compStudioDesc)}
+        ${choice("false", T.compDriver, T.compDriverDesc)}
+      </div>
+      <div class="alert">${ICONS.info}<div><p class="alert-text">${T.compNote}</p></div></div>`;
+    content.querySelectorAll('input[name="components"]').forEach((r) => r.addEventListener("change", () => { state.studio = r.value === "true"; }));
+    footer({ next: { label: T.next, run: () => go("search") }, back: { label: T.back, run: () => go("prepare") } });
   },
 
   prepare() {
     content.innerHTML = `<h2>${T.prepareTitle}</h2><p class="description">${T.prepareDesc}</p>
       ${list(T.prepare.map((t) => row("dot", t)))}`;
     footer({
-      next: { label: T.findPrinter, run: () => go("search") },
+      next: { label: T.next, run: () => go("components") },
       back: state.installed ? { label: T.back, run: () => go("installed") } : null,
     });
   },
@@ -199,8 +246,12 @@ const VIEWS = {
   done() {
     content.innerHTML = `<h2>${T.doneTitle}</h2><p class="description">${T.doneDesc}</p>
       ${list(T.done.map((t) => row("ok", t)))}
-      <div class="actions"><button class="outline" type="button" id="open-settings">${T.settings}</button></div>`;
+      <div class="actions">
+        ${state.studio ? `<button class="primary" type="button" id="open-studio">${T.openStudio}</button>` : ""}
+        <button class="outline" type="button" id="open-settings">${T.settings}</button>
+      </div>`;
     $("#open-settings").addEventListener("click", () => api("open_app"));
+    $("#open-studio")?.addEventListener("click", () => api("open_studio"));
     footer({ next: close, secondary: { label: T.testPage, run: () => testPrint("test_windows") } });
   },
 
@@ -229,7 +280,7 @@ async function installDriver() {
   const title = `<h2>${T.printerTitle}</h2>`;
   content.innerHTML = title + list([row("wait", T.installing, T.confirmUac)]);
   footer({ next: { label: T.install, enabled: false } });
-  const result = await busy(() => api("install", state.port));
+  const result = await busy(() => api("install", state.port, state.studio));
   if (result.ok) {
     state.installed = await api("printer");
     return go("done");
@@ -237,6 +288,16 @@ async function installDriver() {
   const text = result.cancelled ? T.uacDeclined : result.detail;
   content.innerHTML = title + alertBox("error", T.installFailed, text, result.log);
   footer({ next: { label: T.retry, run: installDriver }, back: { label: T.back, run: () => go("connect") } });
+}
+
+async function applyComponents(comps, want) {
+  content.innerHTML = list([row("wait", T.compChanging, T.confirmUac)]);
+  footer({ next: { label: T.apply, enabled: false } });
+  const result = await busy(() => api("set_studio", want.studio));
+  if (result.ok) return go("installed");
+  const text = result.cancelled ? T.uacDeclined : result.detail;
+  content.innerHTML = alertBox("error", T.compFailed, text, result.log);
+  footer({ next: { label: T.back, run: () => go("installed") } });
 }
 
 async function uninstall() {
@@ -273,8 +334,9 @@ btnSecondary.addEventListener("click", () => actions.secondary?.());
 $("#title").textContent = T.title;
 $("#subtitle").textContent = T.subtitle;
 document.title = T.title;
-$("#steps").innerHTML = T.steps.map((s) => `<li>${esc(s)}</li>`).join("");
-$("#steps").setAttribute("aria-label", T.steps.join(" › "));
+const STEP_NAMES = [T.steps[0], T.stepComponents, ...T.steps.slice(1)];
+$("#steps").innerHTML = STEP_NAMES.map((s) => `<li>${esc(s)}</li>`).join("");
+$("#steps").setAttribute("aria-label", STEP_NAMES.join(" › "));
 
 api("mode").then((mode) => {
   state.mode = mode;
@@ -295,6 +357,10 @@ function fakeApi() {
     printer: () => later(300, new URLSearchParams(location.search).has("installed")
       ? { Name: "Qutie", DriverName: "HPRT Qutie", PortName: "COM5:" } : null),
     install: () => later(800, { ok: true }),
+    components: () => later(200, { studio: true, autostart: true, version: "1.1.0" }),
+    set_studio: () => later(600, { ok: true }),
+    set_autostart: (v) => later(100, v),
+    open_studio: () => {},
     uninstall: () => later(800, { ok: true, log: "> Removing the printer\n  printer 'Qutie' removed" }),
     open_app: () => {},
     test_direct: () => later(500, { ok: true }),

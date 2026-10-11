@@ -153,11 +153,54 @@ def _admin_script(script_name: str, parameters: str) -> tuple[bool | None, str]:
     return code == 0, "\n".join(lines)
 
 
-def install_driver(port: str, name: str = PRINTER_NAME) -> tuple[bool | None, str]:
-    parameters = f'-Port {port} -Name "{name}" -SpoolFile "{SPOOL_FILE}"'
+def install_driver(port: str, name: str = PRINTER_NAME, studio: bool = True) -> tuple[bool | None, str]:
+    parameters = f'-Port {port} -Name "{name}" -SpoolFile "{SPOOL_FILE}" -Studio {int(bool(studio))}'
     if getattr(sys, "frozen", False):
         parameters += f' -Executable "{sys.executable}"'
     return _admin_script("install.ps1", parameters)
+
+
+# --------------------------------------------------------------------------- Qutie Studio component
+UNINSTALL_KEY = r"SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\Qutie"
+
+
+def studio_enabled() -> bool:
+    """Whether Qutie Studio was installed with the driver ("Driver and Qutie Studio").
+
+    The setup records the choice in the app's entry in Installed apps. When the app is
+    not installed (development, or "Qutie Setup.exe" run from Downloads) the Studio is
+    available.
+    """
+    import winreg
+
+    try:
+        with winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, UNINSTALL_KEY) as key:
+            value, _ = winreg.QueryValueEx(key, "Studio")
+            return bool(value)
+    except FileNotFoundError:
+        return True
+    except OSError:
+        return True
+
+
+def set_studio(enabled: bool) -> tuple[bool | None, str]:
+    """Add or remove Qutie Studio (Start menu entry and .qutie files); needs administrator rights."""
+    exe = INSTALLED_EXE if INSTALLED_EXE.exists() else Path(sys.executable)
+    return _admin_script("components.ps1", f'-Studio {int(bool(enabled))} -Executable "{exe}"')
+
+
+def reveal(path: str) -> None:
+    """Show a file selected in File Explorer (or open a folder)."""
+    p = Path(path)
+    if p.is_dir():
+        os.startfile(str(p))  # noqa: S606 - a folder of the user
+    else:
+        subprocess.Popen(["explorer.exe", "/select,", str(p)], creationflags=_NO_WINDOW)
+
+
+def open_file(path: str) -> None:
+    """Open a file with its program (an Excel workbook in Excel)."""
+    os.startfile(str(Path(path)))  # noqa: S606
 
 
 def uninstall_driver(name: str = PRINTER_NAME) -> tuple[bool | None, str]:

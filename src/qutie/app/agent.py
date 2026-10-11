@@ -1,16 +1,19 @@
-"""The Qutie app: tray icon, print preview of every Windows job, and the settings panel.
+"""The Qutie app: tray icon, print preview of every Windows job, settings and Qutie Studio.
 
 The Windows printer writes each job to winsys.SPOOL_FILE. This app watches that file,
 shows the labels exactly as they will print and, on confirmation, sends the bytes to
 the printer over Bluetooth. Only one instance runs per user; launching the app again
-just brings up its settings window.
+just brings up its settings window, or Qutie Studio when it is installed.
 """
 
 from __future__ import annotations
 
 import base64
+import ctypes
+import ctypes.wintypes
 import getpass
 import io
+import json
 import queue
 import sys
 import threading
@@ -21,9 +24,10 @@ from pathlib import Path
 import pystray
 import webview
 
-from .. import __version__, spool, winsys
+from .. import __version__, library, render, spool, winsys
 from ..config import Config
 from . import device
+from .designer import DesignerApi, encode_png
 from .icon import draw as draw_icon
 from .strings import t
 
@@ -83,6 +87,7 @@ class PreviewApi:
 
     def print(self, copies: int) -> dict:
         result = device.send(self._job.data, copies)
+        record_windows_job(self._job, copies, result)
         if result["ok"]:
             self._path.unlink(missing_ok=True)
             self._finish()
@@ -101,6 +106,34 @@ class PreviewApi:
         self._done.set()
         if self._window:
             self._window.destroy()
+
+
+def record_windows_job(job: spool.Job, copies: int, result: dict) -> None:
+    """A print from another app, in the Studio's print history (with its bytes, to reprint it)."""
+    copies = max(1, int(copies))
+    try:
+        thumbs = [encode_png(label.image().rotate(-render.ROTATE, expand=True)) for label in job.labels[:3]]
+        tape = sum((label.length_dots or len(label.rows)) + (label.feed_dots or 0) for label in job.labels) / 8
+        library.history_add(
+            {"name": "", "source": "windows", "count": len(job.labels) * copies,
+             "printed": len(job.labels) * copies if result.get("ok") else 0,
+             "ok": bool(result.get("ok")), "error": None if result.get("ok") else result.get("detail"),
+             "media": "gap" if any(label.length_dots for label in job.labels) else "continuous",
+             "tape_mm": round(tape * copies), "thumbs": thumbs, "meta": {"fitted": job.wide}},
+            raw=job.data * copies,
+        )
+    except Exception:  # noqa: BLE001 - the history never blocks a print
+        pass
+
+
+# --------------------------------------------------------------------------- quick print
+class QuickApi(DesignerApi):
+    """The small "quick print" window: type, Enter, printed. The Studio's API, plus:"""
+
+    def open_in_studio(self, text: str) -> None:
+        if self._agent:
+            self._agent.open_studio(text=text)
+        self.close(force=True)
 
 
 # --------------------------------------------------------------------------- settings
@@ -178,18 +211,46 @@ class Agent:
         self.config = Config.load()
         self.jobs: queue.Queue[Path] = queue.Queue()
         self.settings_window: webview.Window | None = None
+        self.studio_window: webview.Window | None = None
+        self.quick_window: webview.Window | None = None
         self.icon: pystray.Icon | None = None
+        self.studio = winsys.studio_enabled()
         self._lock = threading.Lock()
+        self._hotkey_thread: int | None = None
 
     # -- lifecycle
-    def run(self, show_settings: bool, section: str | None = None) -> None:
+    def run(self, show_settings: bool, section: str | None = None, studio: dict | None = None,
+            quick: bool = False) -> None:
         # pywebview needs one window to start; a hidden one keeps the app alive between jobs.
         webview.create_window("Qutie", html="<html></html>", hidden=True)
         threading.Thread(target=self._control_server, daemon=True).start()
         threading.Thread(target=self._watch_spool, daemon=True).start()
         threading.Thread(target=self._process_jobs, daemon=True).start()
         self._start_tray()
-        webview.start((lambda: self.open_settings(section)) if show_settings else None)
+        self.config_changed()
+
+        def first() -> None:
+            if quick:
+                self.open_quick()
+            elif studio is not None:
+                self.open_studio(**studio)
+            elif show_settings:
+                self.open_main(section)
+
+        webview.start(first)
+
+    def open_main(self, section: str | None = None) -> None:
+        """What the Start menu and a click on the tray icon open: the Studio, or the settings."""
+        if self.studio and not section:
+            self.open_studio()
+        else:
+            self.open_settings(section)
+
+    def config_changed(self) -> None:
+        """Settings changed in the Studio: the hotkey and the tray menu follow."""
+        self._set_hotkey(self.studio and self.config.quick_hotkey)
+        if self.icon:
+            self.icon.update_menu()
 
     def quit(self) -> None:
         if self.icon:
@@ -221,6 +282,84 @@ class Agent:
             window.events.closed += self._settings_closed
             self.settings_window = window
 
+    # -- Qutie Studio
+    def open_studio(self, path: str | None = None, view: str | None = None, text: str | None = None) -> None:
+        start = {k: v for k, v in {"path": path, "view": view, "text": text}.items() if v}
+        with self._lock:
+            if self.studio_window is not None:
+                window = self.studio_window
+                window.restore()
+                window.show()
+                if start:
+                    window.evaluate_js(f"window.Studio && Studio.external({json.dumps(start)})")
+                return
+            api = DesignerApi(self, start)
+            window = webview.create_window(
+                "Qutie Studio", str(WEB / "designer.html"), js_api=api,
+                width=1400, height=880, min_size=(1024, 640),
+            )
+            api._win = window
+            window.events.closing += api.on_closing
+            window.events.closed += self._studio_closed
+            self.studio_window = window
+
+    def _studio_closed(self) -> None:
+        self.studio_window = None
+
+    def open_quick(self) -> None:
+        with self._lock:
+            if self.quick_window is not None:
+                self.quick_window.restore()
+                self.quick_window.show()
+                return
+            api = QuickApi(self)
+            window = webview.create_window(
+                "Qutie", str(WEB / "quick.html"), js_api=api,
+                width=480, height=440, resizable=False, on_top=True,
+            )
+            api._win = window
+            window.events.closed += self._quick_closed
+            self.quick_window = window
+
+    def _quick_closed(self) -> None:
+        self.quick_window = None
+
+    def _last_print(self) -> dict | None:
+        return next((e for e in library.history_list(self.config.history_days) if e.get("ok")), None)
+
+    def reprint_last(self) -> None:
+        last = self._last_print()
+        if not last:
+            return
+
+        def work() -> None:
+            result = DesignerApi(self).reprint(last["id"])
+            self.notify(t("printed") if result.get("ok") else t("failed"))
+
+        threading.Thread(target=work, daemon=True).start()
+
+    # -- Win+Shift+Q opens quick print
+    def _set_hotkey(self, enabled: bool) -> None:
+        if self._hotkey_thread:
+            ctypes.windll.user32.PostThreadMessageW(self._hotkey_thread, 0x0012, 0, 0)  # WM_QUIT
+            self._hotkey_thread = None
+        if enabled:
+            threading.Thread(target=self._hotkey_loop, daemon=True).start()
+
+    def _hotkey_loop(self) -> None:
+        user32 = ctypes.windll.user32
+        self._hotkey_thread = ctypes.windll.kernel32.GetCurrentThreadId()
+        mod_shift, mod_win, mod_norepeat = 0x0004, 0x0008, 0x4000
+        if not user32.RegisterHotKey(None, 1, mod_win | mod_shift | mod_norepeat, ord("Q")):
+            return
+        try:
+            msg = ctypes.wintypes.MSG()
+            while user32.GetMessageW(ctypes.byref(msg), None, 0, 0) > 0:
+                if msg.message == 0x0312:  # WM_HOTKEY
+                    self.open_quick()
+        finally:
+            user32.UnregisterHotKey(None, 1)
+
     def close_settings(self) -> None:
         if self.settings_window:
             self.settings_window.destroy()
@@ -230,14 +369,34 @@ class Agent:
 
     # -- tray
     def _start_tray(self) -> None:
-        menu = pystray.Menu(
-            pystray.MenuItem(t("settings"), lambda: self.open_settings(), default=True),
-            pystray.MenuItem(t("preview"), lambda: self.set_preview(not self.config.preview),
-                             checked=lambda _item: self.config.preview),
-            pystray.MenuItem(t("setup"), lambda: winsys.launch_self("--setup")),
-            pystray.Menu.SEPARATOR,
-            pystray.MenuItem(t("quit"), lambda: self.quit()),
-        )
+        def reprint_text(_item) -> str:
+            last = self._last_print()
+            name = (last.get("name") or t("from_windows")) if last else ""
+            return f"{t('reprint_last')}  ·  {name}" if name else t("reprint_last")
+
+        def items():
+            preview = pystray.MenuItem(t("preview_windows" if self.studio else "preview"),
+                                       lambda: self.set_preview(not self.config.preview),
+                                       checked=lambda _item: self.config.preview)
+            setup = pystray.MenuItem(t("setup"), lambda: winsys.launch_self("--setup"))
+            quit_item = pystray.MenuItem(t("quit"), lambda: self.quit())
+            if not self.studio:
+                yield pystray.MenuItem(t("settings"), lambda: self.open_settings(), default=True)
+                yield preview
+                yield setup
+            else:
+                yield pystray.MenuItem(t("open_studio"), lambda: self.open_studio(), default=True)
+                yield pystray.MenuItem(t("quick"), lambda: self.open_quick())
+                yield pystray.MenuItem(reprint_text, lambda: self.reprint_last(),
+                                       enabled=lambda _item: self._last_print() is not None)
+                yield pystray.Menu.SEPARATOR
+                yield preview
+                yield pystray.MenuItem(t("printer_settings"), lambda: self.open_studio(view="printer"))
+                yield setup
+            yield pystray.Menu.SEPARATOR
+            yield quit_item
+
+        menu = pystray.Menu(items)
         self.icon = pystray.Icon("qutie", draw_icon(64), "Qutie", menu)
         self.icon.run_detached()
 
@@ -258,7 +417,14 @@ class Agent:
                 except (OSError, EOFError):
                     continue
                 if isinstance(command, str) and command.startswith("settings"):
-                    self.open_settings(command.partition(":")[2] or None)
+                    self.open_main(command.partition(":")[2] or None)
+                elif isinstance(command, str) and command.startswith("studio:"):
+                    try:
+                        self.open_studio(**json.loads(command.partition(":")[2] or "{}"))
+                    except (ValueError, TypeError):
+                        self.open_studio()
+                elif command == "quick":
+                    self.open_quick()
                 elif command == "quit":
                     self.quit()
                     return
@@ -296,10 +462,13 @@ class Agent:
             # still opens the preview, which explains how to fix it.
             if not self.config.preview and not job.blank:
                 result = device.send(job.data)
+                record_windows_job(job, 1, result)
                 if result["ok"]:
                     path.unlink(missing_ok=True)
                     continue
                 self.notify(t("failed"))  # fall back to the preview, which can retry
+            elif self.studio and self.studio_window is None:
+                self.notify(t("waiting"))
             api = PreviewApi(self, path, original)
             window = webview.create_window(
                 "Qutie", str(WEB / "preview.html"), js_api=api,
@@ -320,11 +489,18 @@ def request(command: str) -> bool:
         return False
 
 
-def main(show_settings: bool = True, section: str | None = None) -> int:
-    # A second launch only asks the running instance to show its settings.
-    if request(f"settings:{section or ''}" if show_settings else "ping"):
+def main(show_settings: bool = True, section: str | None = None, studio: dict | None = None,
+         quick: bool = False) -> int:
+    # A second launch only asks the running instance to show a window.
+    if quick:
+        command = "quick"
+    elif studio is not None:
+        command = "studio:" + json.dumps(studio)
+    else:
+        command = f"settings:{section or ''}" if show_settings else "ping"
+    if request(command):
         return 0
-    Agent().run(show_settings, section)
+    Agent().run(show_settings, section, studio, quick)
     return 0
 
 

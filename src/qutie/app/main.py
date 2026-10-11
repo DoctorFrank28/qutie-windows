@@ -1,6 +1,9 @@
 """Entry point of Qutie.exe.
 
-- --app (or no arguments): the app (tray icon, print preview) with its settings window;
+- --app (or no arguments): the app (tray icon, print preview) with its main window:
+  Qutie Studio when it is installed, otherwise the settings;
+- --studio [file.qutie]: the app with Qutie Studio (the Start menu entry, .qutie files);
+- --quick: the app with the "quick print" window;
 - --background: the app without opening any window (started with Windows);
 - --setup / --uninstall: the setup wizard.
 
@@ -24,6 +27,12 @@ def main() -> int:
         return wizard()
     from .agent import main as agent
 
+    if "--studio" in args:
+        rest = [a for a in args[args.index("--studio") + 1:] if not a.startswith("--")]
+        studio = {"path": str(Path(rest[0]).resolve())} if rest else {}
+        return agent(studio=studio)
+    if "--quick" in args:
+        return agent(quick=True)
     # --section paper|device|…: the settings section to show (the driver plug-in uses it).
     section = args[args.index("--section") + 1] if "--section" in args[:-1] else None
     return agent(show_settings="--background" not in args, section=section)

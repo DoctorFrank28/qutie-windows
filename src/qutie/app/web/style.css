@@ -309,3 +309,4 @@ input[type="number"]:focus-visible { outline: none; border-color: var(--ring); b
 }
 
 [hidden] { display: none !important; }
+.card h3.subtitle { margin: 4px 0 -4px; font-size: 14px; font-weight: 600; }
