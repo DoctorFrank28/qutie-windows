@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Qutie setup</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app">
+    <header>
+      <h1 id="title"></h1>
+      <p id="subtitle"></p>
+    </header>
+
+    <ol class="steps" id="steps"></ol>
+
+    <main class="card" id="content" aria-live="polite"></main>
+
+    <footer>
+      <button class="ghost" id="back" type="button"></button>
+      <span class="spacer"></span>
+      <button class="outline" id="secondary" type="button" hidden></button>
+      <button class="primary" id="next" type="button"></button>
+    </footer>
+  </div>
+  <script src="i18n.js"></script>
+  <script src="wizard.js"></script>
+</body>
+</html>

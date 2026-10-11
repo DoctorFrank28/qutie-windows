@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Qutie</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app">
+    <header class="bar">
+      <div>
+        <h1 id="title"></h1>
+        <p id="summary" aria-live="polite"></p>
+      </div>
+      <div class="actions">
+        <button class="outline" id="strip" type="button" aria-pressed="false"></button>
+        <button class="outline" id="rotate" type="button"></button>
+      </div>
+    </header>
+
+    <main class="labels" id="labels" aria-label=""></main>
+
+    <div class="alert error" id="error" hidden role="alert"></div>
+
+    <footer>
+      <label class="inline-check">
+        <input type="checkbox" id="always" class="check-input">
+        <span id="always-label"></span>
+      </label>
+      <label class="inline-check" id="same-height-wrap" hidden>
+        <input type="checkbox" id="same-height" class="check-input">
+        <span id="same-height-label"></span>
+      </label>
+      <span class="spacer"></span>
+      <div class="stepper" role="group" id="copies-group">
+        <span id="copies-label"></span>
+        <button class="ghost icon-button" id="less" type="button" aria-label="−">−</button>
+        <input id="copies" type="number" min="1" max="99" value="1" inputmode="numeric">
+        <button class="ghost icon-button" id="more" type="button" aria-label="+">+</button>
+      </div>
+      <button class="outline" id="cancel" type="button"></button>
+      <button class="primary" id="print" type="button"></button>
+    </footer>
+  </div>
+  <script src="i18n.js"></script>
+  <script src="preview.js"></script>
+</body>
+</html>
