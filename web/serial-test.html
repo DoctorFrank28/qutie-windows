@@ -1,0 +1,480 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<title>Qutie Serial Test</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* shadcn/ui tokens (neutral), light and dark */
+:root {
+  --background: oklch(1 0 0); --foreground: oklch(0.145 0 0);
+  --card: oklch(1 0 0); --muted: oklch(0.97 0 0); --muted-foreground: oklch(0.556 0 0);
+  --primary: oklch(0.205 0 0); --primary-foreground: oklch(0.985 0 0);
+  --secondary: oklch(0.97 0 0); --accent: oklch(0.97 0 0);
+  --destructive: oklch(0.577 0.245 27.325); --ok: oklch(0.6 0.13 150);
+  --border: oklch(0.922 0 0); --input: oklch(0.922 0 0); --ring: oklch(0.708 0 0);
+  --radius: 0.625rem;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --background: oklch(0.145 0 0); --foreground: oklch(0.985 0 0);
+    --card: oklch(0.205 0 0); --muted: oklch(0.269 0 0); --muted-foreground: oklch(0.708 0 0);
+    --primary: oklch(0.922 0 0); --primary-foreground: oklch(0.205 0 0);
+    --secondary: oklch(0.269 0 0); --accent: oklch(0.269 0 0);
+    --destructive: oklch(0.704 0.191 22.216); --ok: oklch(0.72 0.14 150);
+    --border: oklch(1 0 0 / 10%); --input: oklch(1 0 0 / 15%); --ring: oklch(0.556 0 0);
+  }
+}
+:root[data-theme="dark"] {
+  --background: oklch(0.145 0 0); --foreground: oklch(0.985 0 0);
+  --card: oklch(0.205 0 0); --muted: oklch(0.269 0 0); --muted-foreground: oklch(0.708 0 0);
+  --primary: oklch(0.922 0 0); --primary-foreground: oklch(0.205 0 0);
+  --secondary: oklch(0.269 0 0); --accent: oklch(0.269 0 0);
+  --destructive: oklch(0.704 0.191 22.216); --ok: oklch(0.72 0.14 150);
+  --border: oklch(1 0 0 / 10%); --input: oklch(1 0 0 / 15%); --ring: oklch(0.556 0 0);
+}
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0; background: var(--background); color: var(--foreground);
+  font: 15px/1.5 "Geist", system-ui, sans-serif; -webkit-font-smoothing: antialiased;
+}
+main { max-width: 560px; margin: 0 auto; padding: 20px 16px calc(32px + env(safe-area-inset-bottom)); display: grid; gap: 16px; }
+h1 { font-size: 20px; font-weight: 600; margin: 0; letter-spacing: -0.01em; text-wrap: balance; }
+h2 { font-size: 15px; font-weight: 600; margin: 0; }
+p { margin: 0; }
+.muted { color: var(--muted-foreground); font-size: 13px; }
+.card { background: var(--card); border: 1px solid var(--border); border-radius: calc(var(--radius) + 4px); padding: 16px; display: grid; gap: 12px; }
+.row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.between { justify-content: space-between; }
+.grow { flex: 1 1 auto; min-width: 0; }
+button {
+  font: inherit; font-size: 14px; font-weight: 500; height: 40px; padding: 0 16px; border-radius: var(--radius);
+  border: 1px solid transparent; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  transition: background-color .15s, color .15s, border-color .15s, opacity .15s; touch-action: manipulation;
+}
+button:focus-visible, input:focus-visible { outline: 3px solid color-mix(in oklch, var(--ring) 50%, transparent); outline-offset: 1px; }
+button:disabled { opacity: .5; pointer-events: none; }
+.primary { background: var(--primary); color: var(--primary-foreground); }
+.primary:hover { background: color-mix(in oklch, var(--primary) 90%, transparent); }
+.outline { background: var(--background); color: var(--foreground); border-color: var(--input); }
+.outline:hover { background: var(--accent); }
+.ghost { background: transparent; color: var(--foreground); height: 32px; padding: 0 10px; font-size: 13px; }
+.ghost:hover { background: var(--accent); }
+.full { width: 100%; }
+input[type=text] {
+  font: inherit; height: 40px; width: 100%; padding: 0 12px; border-radius: var(--radius);
+  border: 1px solid var(--input); background: transparent; color: var(--foreground);
+}
+.seg { display: inline-flex; background: var(--muted); border-radius: var(--radius); padding: 3px; gap: 2px; }
+.seg button { height: 32px; padding: 0 12px; font-size: 13px; background: transparent; color: var(--muted-foreground); border-radius: calc(var(--radius) - 3px); }
+.seg button[aria-checked="true"] { background: var(--background); color: var(--foreground); box-shadow: 0 1px 2px oklch(0 0 0 / 10%); }
+.badge { display: inline-flex; align-items: center; gap: 6px; height: 24px; padding: 0 10px; border-radius: 999px; font-size: 12px; font-weight: 500; border: 1px solid var(--border); white-space: nowrap; }
+.badge::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--muted-foreground); }
+.badge.ok::before { background: var(--ok); }
+.badge.bad::before { background: var(--destructive); }
+dl { margin: 0; display: grid; grid-template-columns: auto 1fr; gap: 6px 16px; font-size: 14px; }
+dt { color: var(--muted-foreground); }
+dd { margin: 0; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.checks { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; font-size: 14px; }
+.checks li { display: flex; gap: 8px; align-items: baseline; }
+.checks .mark { width: 16px; flex: none; text-align: center; font-weight: 600; }
+.yes { color: var(--ok); } .no { color: var(--destructive); }
+.preview { background: var(--muted); border-radius: var(--radius); padding: 12px; display: flex; justify-content: center; overflow-x: auto; overscroll-behavior-x: contain; }
+.preview canvas { image-rendering: pixelated; background: #fff; border-radius: 3px; box-shadow: 0 1px 3px oklch(0 0 0 / 20%); height: 72px; width: auto; max-width: none; }
+.log {
+  font: 12px/1.5 "Geist Mono", ui-monospace, monospace; background: var(--muted); border-radius: var(--radius);
+  padding: 10px 12px; height: 260px; overflow: auto; white-space: pre-wrap; overflow-wrap: anywhere; margin: 0;
+  overscroll-behavior: contain; font-variant-numeric: tabular-nums;
+}
+.tx { color: oklch(0.55 0.15 250); } .rx { color: oklch(0.55 0.14 150); } .err { color: var(--destructive); }
+.hidden { display: none !important; }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+</head>
+<body>
+<main>
+  <header class="row between">
+    <div class="grow">
+      <h1>Qutie · Web Serial test</h1>
+      <p class="muted">Connect the HPRT Qutie straight from the browser over Bluetooth (SPP), with no app and no server.</p>
+    </div>
+  </header>
+
+  <section class="card" aria-labelledby="support-title">
+    <h2 id="support-title">This browser</h2>
+    <ul class="checks" id="checks"></ul>
+    <p class="muted">Before connecting: pair the Qutie in the phone's Bluetooth settings, close HerePrint (the printer accepts one connection at a time).</p>
+  </section>
+
+  <section class="card" aria-labelledby="conn-title">
+    <div class="row between">
+      <h2 id="conn-title">Connection</h2>
+      <span class="badge" id="state" role="status">Not connected</span>
+    </div>
+    <div class="row">
+      <button class="primary grow" id="connect" type="button">Choose the Qutie…</button>
+      <button class="outline" id="disconnect" type="button" disabled>Disconnect</button>
+    </div>
+  </section>
+
+  <section class="card" aria-labelledby="printer-title">
+    <div class="row between">
+      <h2 id="printer-title">Printer</h2>
+      <div class="row">
+        <button class="outline" id="status" type="button" disabled>Read status</button>
+        <button class="outline" id="info" type="button" disabled>Read info</button>
+      </div>
+    </div>
+    <dl id="facts"><dt>Battery</dt><dd>—</dd><dt>Paper</dt><dd>—</dd><dt>Density</dt><dd>—</dd><dt>Model</dt><dd>—</dd></dl>
+  </section>
+
+  <section class="card" aria-labelledby="print-title">
+    <h2 id="print-title">Test label</h2>
+    <label class="muted" for="text">Text</label>
+    <input type="text" id="text" name="text" value="Qutie OK" autocomplete="off" spellcheck="false">
+    <div class="row between">
+      <div class="seg" role="radiogroup" aria-label="Label length" id="lengths">
+        <button type="button" role="radio" data-len="30" aria-checked="false">30 mm</button>
+        <button type="button" role="radio" data-len="40" aria-checked="true">40 mm</button>
+        <button type="button" role="radio" data-len="50" aria-checked="false">50 mm</button>
+        <button type="button" role="radio" data-len="auto" aria-checked="false">Auto</button>
+      </div>
+    </div>
+    <div class="preview"><canvas id="label" aria-label="Preview of the label as printed"></canvas></div>
+    <div class="row">
+      <button class="primary grow" id="print" type="button" disabled>Print</button>
+      <button class="outline" id="feed" type="button" disabled>Feed</button>
+    </div>
+  </section>
+
+  <section class="card" aria-labelledby="log-title">
+    <div class="row between">
+      <h2 id="log-title">Log</h2>
+      <div class="row">
+        <button class="ghost" id="copy" type="button">Copy</button>
+        <button class="ghost" id="clear" type="button">Clear</button>
+      </div>
+    </div>
+    <pre class="log" id="log" aria-live="polite"></pre>
+  </section>
+</main>
+
+<script>
+"use strict";
+// Qutie protocol (see src/qutie/protocol.py): Bluetooth classic SPP, plain writes (the XOR
+// handshake is optional), raster in GS v 0 0 blocks of 60 rows, each an LZO1X literal run.
+const SPP = "00001101-0000-1000-8000-00805f9b34fb";
+const DOTS = 96, DPMM = 203 / 25.4, EXTRA_MM = 10, FEED_MM = 14;
+const ESC = 0x1b, GS = 0x1d;
+const $ = (id) => document.getElementById(id);
+
+let port = null, writer = null, reader = null, rx = new Uint8Array(0), waiters = [];
+let length = "40";
+
+// ------------------------------------------------------------------ log
+const logEl = $("log");
+const t0 = performance.now();
+function log(text, cls = "") {
+  const time = ((performance.now() - t0) / 1000).toFixed(2).padStart(7, " ");
+  const line = document.createElement("span");
+  if (cls) line.className = cls;
+  line.textContent = `${time}  ${text}\n`;
+  logEl.append(line);
+  logEl.scrollTop = logEl.scrollHeight;
+}
+const hex = (bytes, max = 48) => {
+  const shown = Array.from(bytes.slice(0, max), (b) => b.toString(16).padStart(2, "0")).join(" ");
+  return bytes.length > max ? `${shown} … (${bytes.length} bytes)` : shown;
+};
+const ascii = (bytes) => Array.from(bytes, (b) => (b >= 32 && b < 127 ? String.fromCharCode(b) : ".")).join("");
+
+// ------------------------------------------------------------------ support
+function checks() {
+  const ua = navigator.userAgent;
+  const items = [
+    [window.isSecureContext, "Secure page (HTTPS)", "Web Serial needs HTTPS (or localhost)."],
+    ["serial" in navigator, "Web Serial API", "Use Chrome or Edge (Android: a recent Chrome). Not Safari, Firefox or in-app browsers."],
+    [/Android/.test(ua) || !/Mobile/.test(ua), /Android/.test(ua) ? "Android" : "Desktop", "On iPhone no browser has Web Serial."],
+  ];
+  $("checks").replaceChildren(...items.map(([ok, label, hint]) => {
+    const li = document.createElement("li");
+    li.innerHTML = `<span class="mark ${ok ? "yes" : "no"}" aria-hidden="true">${ok ? "✓" : "✕"}</span><span>${label}${ok ? "" : ` — <span class="muted">${hint}</span>`}</span>`;
+    return li;
+  }));
+  return items.every(([ok]) => ok);
+}
+
+// ------------------------------------------------------------------ connection
+function setConnected(on, text) {
+  $("state").textContent = text || (on ? "Connected" : "Not connected");
+  $("state").className = `badge ${on ? "ok" : ""}`;
+  for (const id of ["status", "info", "print", "feed", "disconnect"]) $(id).disabled = !on;
+  $("connect").disabled = on;
+}
+
+async function connect() {
+  try {
+    const chosen = await navigator.serial.requestPort({ allowedBluetoothServiceClassIds: [SPP], filters: [{ bluetoothServiceClassId: SPP }] });
+    log(`port chosen: ${JSON.stringify(chosen.getInfo())}`);
+    await open(chosen);
+  } catch (e) {
+    log(`connect: ${e.name}: ${e.message}`, "err");
+    $("state").textContent = e.name === "NotFoundError" ? "No printer chosen" : "Failed";
+    $("state").className = "badge bad";
+  }
+}
+
+async function open(chosen) {
+  $("state").textContent = "Opening…";
+  const started = performance.now();
+  await chosen.open({ baudRate: 115200 });
+  port = chosen;
+  writer = port.writable.getWriter();
+  log(`open in ${Math.round(performance.now() - started)} ms`);
+  setConnected(true);
+  readLoop();
+  port.addEventListener("disconnect", () => { log("the printer disconnected", "err"); cleanup(); });
+}
+
+async function readLoop() {
+  while (port?.readable) {
+    reader = port.readable.getReader();
+    try {
+      for (;;) {
+        const { value, done } = await reader.read();
+        if (done) break;
+        if (value?.length) {
+          const next = new Uint8Array(rx.length + value.length);
+          next.set(rx); next.set(value, rx.length);
+          rx = next;
+          log(`RX ${hex(value)}  ${ascii(value).slice(0, 48)}`, "rx");
+          waiters = waiters.filter((w) => !w());
+        }
+      }
+    } catch (e) {
+      log(`read: ${e.name}: ${e.message}`, "err");
+      break;
+    } finally {
+      reader.releaseLock();
+      reader = null;
+    }
+  }
+}
+
+async function cleanup() {
+  try { await reader?.cancel(); } catch {}
+  try { writer?.releaseLock(); } catch {}
+  try { await port?.close(); } catch {}
+  port = writer = reader = null;
+  setConnected(false);
+}
+
+async function disconnect() {
+  log("disconnect");
+  await cleanup();
+}
+
+async function send(bytes, label = "") {
+  log(`TX ${label ? label + " " : ""}${hex(bytes)}`, "tx");
+  await writer.write(bytes);
+}
+
+/** Bytes received after `from`, once `test` accepts them (or null after `ms`). */
+function waitFor(from, test, ms) {
+  return new Promise((resolve) => {
+    const timer = setTimeout(() => { waiters = waiters.filter((w) => w !== check); resolve(null); }, ms);
+    const check = () => {
+      const got = rx.slice(from);
+      if (!test(got)) return false;
+      clearTimeout(timer);
+      resolve(got);
+      return true;
+    };
+    if (!check()) waiters.push(check);
+  });
+}
+
+async function request(cmd, size, label) {
+  const from = rx.length;
+  const started = performance.now();
+  await send(cmd, label);
+  const reply = await waitFor(from, (b) => b.length >= size, 3000);
+  if (!reply) { log(`${label}: no reply within 3 s (${rx.length - from} bytes)`, "err"); return null; }
+  log(`${label}: reply in ${Math.round(performance.now() - started)} ms`);
+  return reply.slice(0, size);
+}
+
+// ------------------------------------------------------------------ printer
+function setFacts(pairs) {
+  $("facts").replaceChildren(...pairs.flatMap(([k, v]) => {
+    const dt = document.createElement("dt"); dt.textContent = k;
+    const dd = document.createElement("dd"); dd.textContent = v;
+    return [dt, dd];
+  }));
+}
+const facts = {};
+
+async function readStatus() {
+  const b = await request(new Uint8Array([ESC, 0x12, 0x73]), 17, "status");
+  if (!b) return;
+  facts.Battery = `${b[3]}%`;
+  facts.Paper = b[7] === 0 ? "continuous roll" : `type ${b[7]}`;
+  facts.Density = String(b[6]);
+  facts["Auto off"] = `${Math.round((b[4] | (b[5] << 8)) / 60)} min`;
+  setFacts(Object.entries(facts));
+}
+
+const text = (bytes) => new TextDecoder("ascii").decode(bytes).replace(/[\0\xff]+$/g, "").replace(/[^\x20-\x7e]/g, "").trim();
+async function readInfo() {
+  const b = await request(new Uint8Array([ESC, 0x12, 0x64]), 124, "info");
+  if (!b) return;
+  facts.Model = text(b.slice(32, 56));
+  facts.Serial = text(b.slice(56, 88));
+  facts.Firmware = `${b[88]}.${b[89]}.${b[90]}`;
+  facts.Bluetooth = text(b.slice(112, 124));
+  setFacts(Object.entries(facts));
+}
+
+// ------------------------------------------------------------------ the label
+/** The label as read: a canvas `length` mm long and 96 dots high, black text on white. */
+function drawLabel() {
+  const value = $("text").value || " ";
+  const probe = document.createElement("canvas").getContext("2d");
+  const font = (px) => `700 ${px}px "Segoe UI", Roboto, "Geist", system-ui, sans-serif`;
+  const margin = Math.round(2 * DPMM);
+  let px = 72;
+  probe.font = font(px);
+  let width = probe.measureText(value).width;
+  const auto = length === "auto";
+  const len = auto ? Math.min(1000 * DPMM, Math.ceil(width + 2 * margin)) : Math.floor(Number(length) * DPMM);
+  while (px > 8 && (probe.font = font(px), (width = probe.measureText(value).width) > len - 2 * margin)) px -= 2;
+  const canvas = $("label");
+  canvas.width = Math.max(16, Math.floor(len));
+  canvas.height = DOTS;
+  const ctx = canvas.getContext("2d");
+  ctx.fillStyle = "#fff"; ctx.fillRect(0, 0, canvas.width, DOTS);
+  ctx.fillStyle = "#000"; ctx.font = font(px); ctx.textBaseline = "middle"; ctx.textAlign = "center";
+  ctx.fillText(value, canvas.width / 2, DOTS / 2 + px * 0.05);
+  // threshold to dots, as the printer prints them
+  const img = ctx.getImageData(0, 0, canvas.width, DOTS);
+  for (let i = 0; i < img.data.length; i += 4) {
+    const v = (img.data[i] + img.data[i + 1] + img.data[i + 2]) / 3 < 128 ? 0 : 255;
+    img.data[i] = img.data[i + 1] = img.data[i + 2] = v;
+  }
+  ctx.putImageData(img, 0, 0);
+  return { canvas, lengthMm: canvas.width / DPMM, continuous: auto };
+}
+
+/** Rows for the head: the label turned (the start of the text comes out first), 1 = black, MSB left. */
+function rasterRows(canvas) {
+  const L = canvas.width;
+  const src = canvas.getContext("2d").getImageData(0, 0, L, DOTS).data;
+  const out = new Uint8Array(L * DOTS / 8);
+  for (let y = 0; y < L; y++) {            // printed row y = label column y
+    for (let x = 0; x < DOTS; x++) {       // printed column x = label row 95 - x
+      const black = src[((DOTS - 1 - x) * L + y) * 4] < 128;
+      if (black) out[y * 12 + (x >> 3)] |= 0x80 >> (x & 7);
+    }
+  }
+  return out;
+}
+
+function lzoLiterals(data) {
+  const n = data.length, end = [0x11, 0, 0];
+  let head;
+  if (n <= 238) head = [n + 17];
+  else {
+    const rest = n - 18;
+    let zeros = Math.floor(rest / 255), last = rest % 255;
+    if (last === 0) { zeros -= 1; last = 255; }
+    head = [0, ...new Array(zeros).fill(0), last];
+  }
+  const out = new Uint8Array(head.length + n + 3);
+  out.set(head); out.set(data, head.length); out.set(end, head.length + n);
+  return out;
+}
+
+const le = (v, n) => Array.from({ length: n }, (_, i) => (v >> (8 * i)) & 0xff);
+
+function jobBytes({ canvas, lengthMm, continuous }) {
+  const rows = rasterRows(canvas);
+  const parts = [new Uint8Array([ESC, 0x61, 1])];             // centre
+  for (let start = 0; start < rows.length; start += 720) {     // 60 rows × 12 bytes per block
+    const chunk = rows.slice(start, start + 720);
+    const packed = lzoLiterals(chunk);
+    parts.push(new Uint8Array([GS, 0x76, 0x30, 0x30, ...le(12, 2), ...le(chunk.length / 12, 2), ...le(packed.length, 4)]), packed);
+  }
+  const dots = (mm) => Math.floor(mm * DPMM + 1e-6);
+  if (!continuous) parts.push(new Uint8Array([GS, 0x66, ...le(dots(lengthMm), 2)]), new Uint8Array([ESC, ESC, 1, ...le(dots(EXTRA_MM), 2)]));
+  else parts.push(new Uint8Array([ESC, ESC, 1, ...le(dots(FEED_MM), 2)]));
+  return parts;
+}
+
+async function print() {
+  $("print").disabled = true;
+  try {
+    const label = drawLabel();
+    const parts = jobBytes(label);
+    const total = parts.reduce((s, p) => s + p.length, 0);
+    log(`print "${$("text").value}": ${label.canvas.width} × ${DOTS} dots, ${parts.length} writes, ${total} bytes`);
+    const from = rx.length, started = performance.now();
+    for (const p of parts) await send(p);
+    log(`sent in ${Math.round(performance.now() - started)} ms, waiting for the printer…`);
+    const done = await waitFor(from, (b) => ascii(b).includes("dithering_finish"), 10000);
+    if (done) log(`printed: confirmation after ${Math.round(performance.now() - started)} ms`);
+    else log("no confirmation within 10 s (the label may still have printed)", "err");
+  } catch (e) {
+    log(`print: ${e.name}: ${e.message}`, "err");
+  } finally {
+    $("print").disabled = !port;
+  }
+}
+
+async function feed() {
+  await send(new Uint8Array([ESC, ESC, 1, ...le(Math.floor(FEED_MM * DPMM), 2)]), "feed");
+}
+
+// ------------------------------------------------------------------ wiring
+$("connect").addEventListener("click", connect);
+$("disconnect").addEventListener("click", disconnect);
+$("status").addEventListener("click", readStatus);
+$("info").addEventListener("click", readInfo);
+$("print").addEventListener("click", print);
+$("feed").addEventListener("click", feed);
+$("text").addEventListener("input", drawLabel);
+$("lengths").addEventListener("click", (e) => {
+  const b = e.target.closest("button[data-len]");
+  if (!b) return;
+  length = b.dataset.len;
+  for (const x of $("lengths").querySelectorAll("button")) x.setAttribute("aria-checked", String(x === b));
+  drawLabel();
+});
+$("lengths").addEventListener("keydown", (e) => {
+  if (!["ArrowLeft", "ArrowRight"].includes(e.key)) return;
+  const all = [...$("lengths").querySelectorAll("button")];
+  const i = all.findIndex((x) => x.getAttribute("aria-checked") === "true");
+  const next = all[(i + (e.key === "ArrowRight" ? 1 : all.length - 1)) % all.length];
+  next.focus(); next.click();
+});
+$("clear").addEventListener("click", () => { logEl.textContent = ""; });
+$("copy").addEventListener("click", async () => {
+  try { await navigator.clipboard.writeText(logEl.textContent); log("log copied"); } catch { log("copy not allowed here", "err"); }
+});
+
+const supported = checks();
+setConnected(false);
+if (!supported) { $("connect").disabled = true; log("this browser cannot use Web Serial: see the checks above", "err"); }
+else {
+  log(`ready · ${navigator.userAgent}`);
+  navigator.serial.getPorts().then((ports) => { if (ports.length) log(`${ports.length} port(s) already allowed on this page`); });
+}
+document.fonts?.ready.then(drawLabel);
+drawLabel();
+</script>
+</body>
+</html>
