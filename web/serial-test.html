@@ -120,6 +120,8 @@ dd { margin: 0; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
       <button class="primary grow" id="connect" type="button">Choose the Qutie…</button>
       <button class="outline" id="disconnect" type="button" disabled>Disconnect</button>
     </div>
+    <button class="outline full" id="connect-all" type="button">Show all ports (no filter)</button>
+    <p class="muted">Nothing in the list? Pair the Qutie in Android's Bluetooth settings, give Chrome the “Nearby devices” permission (Settings › Apps › Chrome › Permissions) and try “Show all ports”.</p>
   </section>
 
   <section class="card" aria-labelledby="printer-title">
@@ -215,11 +217,17 @@ function setConnected(on, text) {
   $("state").className = `badge ${on ? "ok" : ""}`;
   for (const id of ["status", "info", "print", "feed", "disconnect"]) $(id).disabled = !on;
   $("connect").disabled = on;
+  $("connect-all").disabled = on;
 }
 
-async function connect() {
+async function connect(event) {
+  const all = event?.currentTarget?.id === "connect-all";
   try {
-    const chosen = await navigator.serial.requestPort({ allowedBluetoothServiceClassIds: [SPP], filters: [{ bluetoothServiceClassId: SPP }] });
+    // The filter keeps devices with the serial port service (SPP); without it Chrome lists every
+    // port it may open, still allowing SPP on Bluetooth devices.
+    const options = all ? { allowedBluetoothServiceClassIds: [SPP] } : { allowedBluetoothServiceClassIds: [SPP], filters: [{ bluetoothServiceClassId: SPP }] };
+    log(`requestPort ${all ? "without filter" : "filtered on SPP"}`);
+    const chosen = await navigator.serial.requestPort(options);
     log(`port chosen: ${JSON.stringify(chosen.getInfo())}`);
     await open(chosen);
   } catch (e) {
@@ -441,6 +449,7 @@ async function feed() {
 
 // ------------------------------------------------------------------ wiring
 $("connect").addEventListener("click", connect);
+$("connect-all").addEventListener("click", connect);
 $("disconnect").addEventListener("click", disconnect);
 $("status").addEventListener("click", readStatus);
 $("info").addEventListener("click", readInfo);
@@ -468,9 +477,10 @@ $("copy").addEventListener("click", async () => {
 
 const supported = checks();
 setConnected(false);
-if (!supported) { $("connect").disabled = true; log("this browser cannot use Web Serial: see the checks above", "err"); }
+if (!supported) { $("connect").disabled = $("connect-all").disabled = true; log("this browser cannot use Web Serial: see the checks above", "err"); }
 else {
-  log(`ready · ${navigator.userAgent}`);
+  const chrome = (navigator.userAgentData?.brands || []).map((b) => `${b.brand} ${b.version}`).join(", ") || (navigator.userAgent.match(/Chrome\/[\d.]+/) || ["?"])[0];
+  log(`ready · ${chrome} · ${navigator.userAgentData?.platform || navigator.platform}`);
   navigator.serial.getPorts().then((ports) => { if (ports.length) log(`${ports.length} port(s) already allowed on this page`); });
 }
 document.fonts?.ready.then(drawLabel);
