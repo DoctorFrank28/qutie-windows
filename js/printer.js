@@ -258,7 +258,7 @@ class Printer extends EventTarget {
       const started = performance.now();
       const trace = (this.lastTrace = []);
       const note = (what) => trace.push({ ms: Math.round(performance.now() - started), what });
-      this.inbox.onData = (v) => note(`printer: ${latin1(v).replace(/[^ -~]+/g, " ").trim() || `${v.length} bytes`}`);
+      this.inbox.onData = (v) => note(`printer: ${latin1(v).replace(/[^\x20-\x7e]+/g, " ").trim() || `${v.length} bytes`}`);
       try {
         for (const { raster, media } of labels) {
           const writes = labelJob(raster, media);

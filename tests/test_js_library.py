@@ -7,6 +7,7 @@ the driver's (label_job). Node runs the library (tests/js/library_dump.mjs).
 import base64
 import json
 import random
+import re
 import shutil
 import subprocess
 import sys
@@ -33,6 +34,20 @@ def run(cases: dict) -> dict:
 def test_bundle_is_up_to_date():
     r = subprocess.run([sys.executable, str(ROOT / "tools" / "build_js.py"), "--check"], capture_output=True, text=True)
     assert r.returncode == 0, r.stderr
+
+
+@node
+@pytest.mark.parametrize("page", ["index.html", "serial-test.html"])
+def test_page_scripts_parse(page, tmp_path):
+    """A syntax error stops a page's whole script, and nothing else would notice."""
+    html = (ROOT / "web" / page).read_text(encoding="utf-8")
+    scripts = re.findall(r"<script(?:\s+type=\"module\")?>(.*?)</script>", html, re.S)
+    assert scripts, page
+    for i, script in enumerate(scripts):
+        path = tmp_path / f"{i}.mjs"
+        path.write_text(script, encoding="utf-8")
+        r = subprocess.run(["node", "--check", str(path)], capture_output=True, text=True)
+        assert r.returncode == 0, (page, r.stderr)
 
 
 BARCODES = [

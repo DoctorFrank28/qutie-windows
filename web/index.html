@@ -353,8 +353,7 @@ $("print").addEventListener("click", async () => {
   } finally {
     $("print").disabled = !state.printer;
     const trace = state.printer?.lastTrace || [];
-    $("trace").textContent = trace.map((t) => `${String(t.ms).padStart(6)} ms  ${t.what}`).join("
-");
+    $("trace").textContent = trace.map((t) => `${String(t.ms).padStart(6)} ms  ${t.what}`).join("\n");
     $("trace-box").classList.toggle("hidden", !trace.length);
   }
 });
