@@ -2259,8 +2259,9 @@ class QutieError extends Error {
 
 /** Bytes from the printer, and waiting for some. */
 class Inbox {
-  constructor() { this.bytes = new Uint8Array(0); this.waiters = []; }
+  constructor() { this.bytes = new Uint8Array(0); this.waiters = []; this.onData = null; }
   push(value) {
+    this.onData?.(value);
     const next = new Uint8Array(this.bytes.length + value.length);
     next.set(this.bytes);
     next.set(value, this.bytes.length);
@@ -2449,6 +2450,8 @@ class Printer extends EventTarget {
     this.link = link;
     this.inbox = inbox;
     this.busy = Promise.resolve();
+    /** What happened in the last print: [{ms, what}], times from its start (to see why it was slow). */
+    this.lastTrace = [];
   }
 
   /** "bluetooth" or "serial"; null once disconnected. */
@@ -2495,16 +2498,30 @@ class Printer extends EventTarget {
   printRasters(labels, { onProgress } = {}) {
     return this.#queue(async () => {
       let printed = 0;
-      for (const { raster, media } of labels) {
-        const writes = labelJob(raster, media);
-        for (const w of writes) await this.#send(w);
-        // Printed once the printer reports so after the last byte (slow sending also gets one between blocks).
-        const from = this.inbox.bytes.length;
-        const done = await this.inbox.wait(from, (b) => latin1(b).includes(FINISHED), 20000);
-        if (!done) throw new QutieError(`label ${printed + 1}: no confirmation from the printer`, "timeout");
-        printed++;
-        onProgress?.({ printed, total: labels.length });
-        this.dispatchEvent(new CustomEvent("printed", { detail: { printed, total: labels.length } }));
+      const started = performance.now();
+      const trace = (this.lastTrace = []);
+      const note = (what) => trace.push({ ms: Math.round(performance.now() - started), what });
+      this.inbox.onData = (v) => note(`printer: ${latin1(v).replace(/[^ -~]+/g, " ").trim() || `${v.length} bytes`}`);
+      try {
+        for (const { raster, media } of labels) {
+          const writes = labelJob(raster, media);
+          const last = writes.findLastIndex((w) => w[0] === 0x1d && w[1] === 0x76); // the last raster block
+          let from = this.inbox.bytes.length;
+          for (const [i, w] of writes.entries()) {
+            // The printer reports "dithering_finish" once it has printed all it received: the first
+            // one from the start of the last block on (a slow link also gets one between blocks).
+            if (i === last) from = this.inbox.bytes.length;
+            await this.#send(w);
+            note(`label ${printed + 1}: sent ${w.length} bytes`);
+          }
+          const done = await this.inbox.wait(from, (b) => latin1(b).includes(FINISHED), 20000);
+          if (!done) throw new QutieError(`label ${printed + 1}: no confirmation from the printer`, "timeout");
+          printed++;
+          onProgress?.({ printed, total: labels.length });
+          this.dispatchEvent(new CustomEvent("printed", { detail: { printed, total: labels.length } }));
+        }
+      } finally {
+        this.inbox.onData = null;
       }
       return { printed };
     });
