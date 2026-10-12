@@ -20,6 +20,13 @@ NOW = "2026-10-03T09:05:00"
 node = pytest.mark.skipif(shutil.which("node") is None, reason="Node.js is not installed")
 
 
+def old_german() -> bool:
+    """Before CLDR 48 Intl wrote the German month and year as 09.2026; the tables follow the
+    Studio's WebView2, which writes 09/2026. An older Node cannot check German."""
+    r = subprocess.run(["node", "-p", "process.versions.cldr"], capture_output=True, text=True, timeout=30)
+    return int(r.stdout.split(".")[0]) < 48
+
+
 def text(id_, value, **props):
     return {"id": id_, "type": "text", "text": value, "x": 1, "y": 1, "w": 30, "h": 10, **props}
 
@@ -116,6 +123,8 @@ def run_py(lang: str, raw: dict) -> list[dict]:
 @node
 @pytest.mark.parametrize("lang", ["it", "en-GB", "en-US", "de", "zh"])
 def test_plans_match_the_studio(lang):
+    if lang == "de" and old_german():
+        pytest.skip("this Node's CLDR is older than 48: German month and year differ from the Studio's")
     for case in run_js(lang, [PANTRY, COUNTER, RANGE, CHECKED], templates=True):
         expected = case["labels"]
         got = run_py(lang, case["doc"])
@@ -146,6 +155,8 @@ console.log(JSON.stringify(out));"""
     r = subprocess.run(["node", "-e", script], capture_output=True, text=True, encoding="utf-8", timeout=30)
     intl = json.loads(r.stdout)
     day = dt.date(2026, 9, 3)  # September: one digit, to see which formats pad it
+    if old_german():
+        del intl["de"]
     for lang, want in intl.items():
         f = formats.TABLE[lang]
         assert document.short_date(day, f) == want["date"], lang

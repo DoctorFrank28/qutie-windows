@@ -34,7 +34,7 @@ TABLE = {
     "it": Formats("it", "{d}/{m}/{y}", "{m}/{y}", ",", _months("gen feb mar apr mag giu lug ago set ott nov dic"), "sì", "no"),
     "es": Formats("es", "{d}/{m}/{y}", "{mn}/{y}", ",", _months("ene feb mar abr may jun jul ago sept oct nov dic"), "sí", "no"),
     "fr": Formats("fr", "{d}/{m}/{y}", "{m}/{y}", ",", _months("janv févr mars avr mai juin juil août sept oct nov déc"), "oui", "non"),
-    "de": Formats("de", "{d}.{m}.{y}", "{m}.{y}", ",", _months("Jan Feb Mär Apr Mai Jun Jul Aug Sep Okt Nov Dez"), "ja", "nein"),
+    "de": Formats("de", "{d}.{m}.{y}", "{m}/{y}", ",", _months("Jan Feb Mär Apr Mai Jun Jul Aug Sep Okt Nov Dez"), "ja", "nein"),
     "pt": Formats("pt", "{d}/{m}/{y}", "{m}/{y}", ",", _months("jan fev mar abr mai jun jul ago set out nov dez"), "sim", "não"),
     "ru": Formats("ru", "{d}.{m}.{y}", "{m}.{y}", ",", _months("янв февр март апр май июнь июль авг сент окт нояб дек"), "да", "нет"),
     "zh": Formats("zh", "{y}/{m}/{d}", "{y}年{mn}月", ".", tuple(f"{i}月" for i in range(1, 13)), "是", "否"),
