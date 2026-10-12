@@ -193,8 +193,9 @@ $("connect").addEventListener("click", async () => {
     const s = await printer.status();
     $("printer-line").textContent = `${printer.name} · battery ${s.battery}% · ${s.paper === "continuous" ? "continuous tape" : "gap labels"} · density ${s.density}`;
   } catch (e) {
-    showPrinter(e.name === "NotFoundError" ? "No printer chosen" : "Not connected", false, e.name !== "NotFoundError");
-    if (e.name !== "NotFoundError") $("printer-line").textContent = e.message;
+    const cancelled = e.name === "NotFoundError" && /cancel/i.test(e.message);
+    showPrinter(cancelled ? "No printer chosen" : "Not connected", false, !cancelled);
+    $("printer-line").textContent = `${e.name}: ${e.message}`;
   }
 });
 $("disconnect").addEventListener("click", async () => { await state.printer?.disconnect(); state.printer = null; showPrinter("Not connected"); });
